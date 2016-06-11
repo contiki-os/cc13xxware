@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       rf_mailbox.h
-*  Revised:        2015-06-29 12:59:58 +0200 (Mon, 29 Jun 2015)
-*  Revision:       44063
+*  Revised:        2015-11-17 11:32:35 +0100 (Tue, 17 Nov 2015)
+*  Revision:       45105
 *
 *  Description:    Definitions for interface between system and radio CPU
 *
@@ -41,6 +41,18 @@
 
 #include <stdint.h>
 #include <string.h>
+
+
+/// \name RF mode values
+/// Defines used to indicate mode of operation to radio core.
+///@{
+#define RF_MODE_PROPRIETARY_SUB_1  0x00
+#define RF_MODE_BLE                0x01
+#define RF_MODE_IEEE_15_4          0x02
+#define RF_MODE_PROPRIETARY_2_4    0x03
+#define RF_MODE_PROPRIETARY        RF_MODE_PROPRIETARY_2_4
+///@}
+
 
 /// Type definition for RAT
 typedef uint32_t ratmr_t;

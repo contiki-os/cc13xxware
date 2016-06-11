@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       rf_prop_cmd.h
-*  Revised:        2015-08-04 10:40:45 +0200 (Tue, 04 Aug 2015)
-*  Revision:       44326
+*  Revised:        2016-04-07 15:04:05 +0200 (Thu, 07 Apr 2016)
+*  Revision:       46052
 *
 *  Description:    CC13xx API for Proprietary mode commands
 *
@@ -62,8 +62,11 @@ typedef struct __RFC_STRUCT rfc_CMD_PROP_TX_s rfc_CMD_PROP_TX_t;
 typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_s rfc_CMD_PROP_RX_t;
 typedef struct __RFC_STRUCT rfc_CMD_PROP_TX_ADV_s rfc_CMD_PROP_TX_ADV_t;
 typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_ADV_s rfc_CMD_PROP_RX_ADV_t;
+typedef struct __RFC_STRUCT rfc_CMD_PROP_CS_s rfc_CMD_PROP_CS_t;
 typedef struct __RFC_STRUCT rfc_CMD_PROP_RADIO_SETUP_s rfc_CMD_PROP_RADIO_SETUP_t;
 typedef struct __RFC_STRUCT rfc_CMD_PROP_RADIO_DIV_SETUP_s rfc_CMD_PROP_RADIO_DIV_SETUP_t;
+typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_SNIFF_s rfc_CMD_PROP_RX_SNIFF_t;
+typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_ADV_SNIFF_s rfc_CMD_PROP_RX_ADV_SNIFF_t;
 typedef struct __RFC_STRUCT rfc_CMD_PROP_SET_LEN_s rfc_CMD_PROP_SET_LEN_t;
 typedef struct __RFC_STRUCT rfc_CMD_PROP_RESTART_RX_s rfc_CMD_PROP_RESTART_RX_t;
 typedef struct __RFC_STRUCT rfc_propRxOutput_s rfc_propRxOutput_t;
@@ -367,6 +370,73 @@ struct __RFC_STRUCT rfc_CMD_PROP_RX_ADV_s {
 
 //! @}
 
+//! \addtogroup CMD_PROP_CS
+//! @{
+#define CMD_PROP_CS                                             0x3805
+struct __RFC_STRUCT rfc_CMD_PROP_CS_s {
+   uint16_t commandNo;                  //!<        The command ID number 0x3805
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
+                                        //!<        updated by the radio CPU during operation and may be read by the
+                                        //!<        system CPU at any time.
+   rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
+   ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } startTrigger;                      //!<        Identification of the trigger that starts the operation
+   struct {
+      uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
+      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+   } condition;
+   struct {
+      uint8_t bFsOffIdle:1;             //!< \brief 0: Keep synth running if command ends with channel Idle<br>
+                                        //!<        1: Turn off synth if command ends with channel Idle
+      uint8_t bFsOffBusy:1;             //!< \brief 0: Keep synth running if command ends with channel Busy<br>
+                                        //!<        1: Turn off synth if command ends with channel Busy
+   } csFsConf;
+   uint8_t __dummy0;
+   struct {
+      uint8_t bEnaRssi:1;               //!<        If 1, enable RSSI as a criterion
+      uint8_t bEnaCorr:1;               //!<        If 1, enable correlation as a criterion
+      uint8_t operation:1;              //!< \brief 0: Busy if either RSSI or correlation indicates Busy<br>
+                                        //!<        1: Busy if both RSSI and correlation indicates Busy
+      uint8_t busyOp:1;                 //!< \brief 0: Continue carrier sense on channel Busy<br>
+                                        //!<        1: End carrier sense on channel Busy<br>
+                                        //!<        For an Rx command, the receiver will continue when carrier sense ends, but it will then not end if channel goes Idle
+      uint8_t idleOp:1;                 //!< \brief 0: Continue on channel Idle<br>
+                                        //!<        1: End on channel Idle
+      uint8_t timeoutRes:1;             //!< \brief 0: Timeout with channel state Invalid treated as Busy<br>
+                                        //!<        1: Timeout with channel state Invalid treated as Idle
+   } csConf;
+   int8_t rssiThr;                      //!<        RSSI threshold
+   uint8_t numRssiIdle;                 //!< \brief Number of consecutive RSSI measurements below the threshold needed before the channel is
+                                        //!<        declared Idle
+   uint8_t numRssiBusy;                 //!< \brief Number of consecutive RSSI measurements above the threshold needed before the channel is
+                                        //!<        declared Busy
+   uint16_t corrPeriod;                 //!<        Number of RAT ticks for a correlation observation periods
+   struct {
+      uint8_t numCorrInv:4;             //!< \brief Number of subsequent correlation tops with maximum <code>corrPeriod</code> RAT
+                                        //!<        ticks between them needed to go from Idle to Invalid
+      uint8_t numCorrBusy:4;            //!< \brief Number of subsequent correlation tops with maximum <code>corrPeriod</code> RAT
+                                        //!<        ticks between them needed to go from Invalid to Busy
+   } corrConfig;
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } csEndTrigger;                      //!<        Trigger classifier for ending the carrier sense
+   ratmr_t csEndTime;                   //!<        Time used together with <code>csEndTrigger</code> for ending the operation
+};
+
+//! @}
+
 //! \addtogroup CMD_PROP_RADIO_SETUP
 //! @{
 #define CMD_PROP_RADIO_SETUP                                    0x3806
@@ -438,7 +508,13 @@ struct __RFC_STRUCT rfc_CMD_PROP_RADIO_SETUP_s {
                                         //!<        Others: <i>Reserved</i>
       uint16_t biasMode:1;              //!< \brief 0: Internal bias<br>
                                         //!<        1: External bias
-      uint16_t :6;
+      uint16_t analogCfgMode:6;         //!< \brief 0x00: Write analog configuration.<br>
+                                        //!<        Required first time after boot and when changing frequency band
+                                        //!<        or front-end configuration<br>
+                                        //!<        0x2D: Keep analog configuration.<br>
+                                        //!<        May be used after standby or when changing mode with the same frequency
+                                        //!<        band and front-end configuration<br>
+                                        //!<        Others: <i>Reserved</i>
       uint16_t bNoFsPowerUp:1;          //!< \brief 0: Power up frequency synth<br>
                                         //!<        1: Do not power up frequency synth
    } config;                            //!<        Configuration options
@@ -520,7 +596,13 @@ struct __RFC_STRUCT rfc_CMD_PROP_RADIO_DIV_SETUP_s {
                                         //!<        Others: <i>Reserved</i>
       uint16_t biasMode:1;              //!< \brief 0: Internal bias<br>
                                         //!<        1: External bias
-      uint16_t :6;
+      uint16_t analogCfgMode:6;         //!< \brief 0x00: Write analog configuration.<br>
+                                        //!<        Required first time after boot and when changing frequency band
+                                        //!<        or front-end configuration<br>
+                                        //!<        0x2D: Keep analog configuration.<br>
+                                        //!<        May be used after standby or when changing mode with the same frequency
+                                        //!<        band and front-end configuration<br>
+                                        //!<        Others: <i>Reserved</i>
       uint16_t bNoFsPowerUp:1;          //!< \brief 0: Power up frequency synth<br>
                                         //!<        1: Do not power up frequency synth
    } config;                            //!<        Configuration options
@@ -535,6 +617,230 @@ struct __RFC_STRUCT rfc_CMD_PROP_RADIO_DIV_SETUP_s {
                                         //!<        intermediate frequency if supported, otherwise 0.<br>
                                         //!<        0x8000: Use default.
    uint8_t loDivider;                   //!<        LO frequency divider setting to use. Supported values: 2, 5, 6, 10, 12, 15, and 30
+};
+
+//! @}
+
+//! \addtogroup CMD_PROP_RX_SNIFF
+//! @{
+#define CMD_PROP_RX_SNIFF                                       0x3808
+struct __RFC_STRUCT rfc_CMD_PROP_RX_SNIFF_s {
+   uint16_t commandNo;                  //!<        The command ID number 0x3808
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
+                                        //!<        updated by the radio CPU during operation and may be read by the
+                                        //!<        system CPU at any time.
+   rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
+   ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } startTrigger;                      //!<        Identification of the trigger that starts the operation
+   struct {
+      uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
+      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+   } condition;
+   struct {
+      uint8_t bFsOff:1;                 //!< \brief 0: Keep frequency synth on after command<br>
+                                        //!<        1: Turn frequency synth off after command
+      uint8_t bRepeatOk:1;              //!< \brief 0: End operation after receiving a packet correctly<br>
+                                        //!<        1: Go back to sync search after receiving a packet correctly
+      uint8_t bRepeatNok:1;             //!< \brief 0: End operation after receiving a packet with CRC error<br>
+                                        //!<        1: Go back to sync search after receiving a packet with CRC error
+      uint8_t bUseCrc:1;                //!< \brief 0: Do not check CRC<br>
+                                        //!<        1: Check CRC
+      uint8_t bVarLen:1;                //!< \brief 0: Fixed length<br>
+                                        //!<        1: Receive length as first byte
+      uint8_t bChkAddress:1;            //!< \brief 0: No address check<br>
+                                        //!<        1: Check address
+      uint8_t endType:1;                //!< \brief 0: Packet is received to the end if end trigger happens after sync is obtained<br>
+                                        //!<        1: Packet reception is stopped if end trigger happens
+      uint8_t filterOp:1;               //!< \brief 0: Stop receiver and restart sync search on address mismatch<br>
+                                        //!<        1: Receive packet and mark it as ignored on address mismatch
+   } pktConf;
+   struct {
+      uint8_t bAutoFlushIgnored:1;      //!<        If 1, automatically discard ignored packets from Rx queue
+      uint8_t bAutoFlushCrcErr:1;       //!<        If 1, automatically discard packets with CRC error from Rx queue
+      uint8_t :1;
+      uint8_t bIncludeHdr:1;            //!<        If 1, include the received header or length byte in the stored packet; otherwise discard it
+      uint8_t bIncludeCrc:1;            //!<        If 1, include the received CRC field in the stored packet; otherwise discard it
+      uint8_t bAppendRssi:1;            //!<        If 1, append an RSSI byte to the packet in the Rx queue
+      uint8_t bAppendTimestamp:1;       //!<        If 1, append a timestamp to the packet in the Rx queue
+      uint8_t bAppendStatus:1;          //!<        If 1, append a status byte to the packet in the Rx queue
+   } rxConf;                            //!<        Rx configuration
+   uint32_t syncWord;                   //!<        Sync word to listen for
+   uint8_t maxPktLen;                   //!< \brief Packet length for fixed length, maximum packet length for variable length<br>
+                                        //!<        0: Unlimited or unknown length
+   uint8_t address0;                    //!<        Address
+   uint8_t address1;                    //!< \brief Address (set equal to <code>address0</code> to accept only one address. If 0xFF, accept
+                                        //!<        0x00 as well)
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } endTrigger;                        //!<        Trigger classifier for ending the operation
+   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> for ending the operation
+   dataQueue_t* pQueue;                 //!<        Pointer to receive queue
+   uint8_t* pOutput;                    //!<        Pointer to output structure
+   struct {
+      uint8_t bEnaRssi:1;               //!<        If 1, enable RSSI as a criterion
+      uint8_t bEnaCorr:1;               //!<        If 1, enable correlation as a criterion
+      uint8_t operation:1;              //!< \brief 0: Busy if either RSSI or correlation indicates Busy<br>
+                                        //!<        1: Busy if both RSSI and correlation indicates Busy
+      uint8_t busyOp:1;                 //!< \brief 0: Continue carrier sense on channel Busy<br>
+                                        //!<        1: End carrier sense on channel Busy<br>
+                                        //!<        For an Rx command, the receiver will continue when carrier sense ends, but it will then not end if channel goes Idle
+      uint8_t idleOp:1;                 //!< \brief 0: Continue on channel Idle<br>
+                                        //!<        1: End on channel Idle
+      uint8_t timeoutRes:1;             //!< \brief 0: Timeout with channel state Invalid treated as Busy<br>
+                                        //!<        1: Timeout with channel state Invalid treated as Idle
+   } csConf;
+   int8_t rssiThr;                      //!<        RSSI threshold
+   uint8_t numRssiIdle;                 //!< \brief Number of consecutive RSSI measurements below the threshold needed before the channel is
+                                        //!<        declared Idle
+   uint8_t numRssiBusy;                 //!< \brief Number of consecutive RSSI measurements above the threshold needed before the channel is
+                                        //!<        declared Busy
+   uint16_t corrPeriod;                 //!<        Number of RAT ticks for a correlation observation periods
+   struct {
+      uint8_t numCorrInv:4;             //!< \brief Number of subsequent correlation tops with maximum <code>corrPeriod</code> RAT
+                                        //!<        ticks between them needed to go from Idle to Invalid
+      uint8_t numCorrBusy:4;            //!< \brief Number of subsequent correlation tops with maximum <code>corrPeriod</code> RAT
+                                        //!<        ticks between them needed to go from Invalid to Busy
+   } corrConfig;
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } csEndTrigger;                      //!<        Trigger classifier for ending the carrier sense
+   ratmr_t csEndTime;                   //!<        Time used together with <code>csEndTrigger</code> for ending the operation
+};
+
+//! @}
+
+//! \addtogroup CMD_PROP_RX_ADV_SNIFF
+//! @{
+#define CMD_PROP_RX_ADV_SNIFF                                   0x3809
+struct __RFC_STRUCT rfc_CMD_PROP_RX_ADV_SNIFF_s {
+   uint16_t commandNo;                  //!<        The command ID number 0x3809
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
+                                        //!<        updated by the radio CPU during operation and may be read by the
+                                        //!<        system CPU at any time.
+   rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
+   ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } startTrigger;                      //!<        Identification of the trigger that starts the operation
+   struct {
+      uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
+      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+   } condition;
+   struct {
+      uint8_t bFsOff:1;                 //!< \brief 0: Keep frequency synth on after command<br>
+                                        //!<        1: Turn frequency synth off after command
+      uint8_t bRepeatOk:1;              //!< \brief 0: End operation after receiving a packet correctly<br>
+                                        //!<        1: Go back to sync search after receiving a packet correctly
+      uint8_t bRepeatNok:1;             //!< \brief 0: End operation after receiving a packet with CRC error<br>
+                                        //!<        1: Go back to sync search after receiving a packet with CRC error
+      uint8_t bUseCrc:1;                //!< \brief 0: Do not check CRC<br>
+                                        //!<        1: Check CRC
+      uint8_t bCrcIncSw:1;              //!< \brief 0: Do not include sync word in CRC calculation<br>
+                                        //!<        1: Include sync word in CRC calculation
+      uint8_t bCrcIncHdr:1;             //!< \brief 0: Do not include header in CRC calculation <br>
+                                        //!<        1: Include header in CRC calculation
+      uint8_t endType:1;                //!< \brief 0: Packet is received to the end if end trigger happens after sync is obtained<br>
+                                        //!<        1: Packet reception is stopped if end trigger happens
+      uint8_t filterOp:1;               //!< \brief 0: Stop receiver and restart sync search on address mismatch<br>
+                                        //!<        1: Receive packet and mark it as ignored on address mismatch
+   } pktConf;
+   struct {
+      uint8_t bAutoFlushIgnored:1;      //!<        If 1, automatically discard ignored packets from Rx queue
+      uint8_t bAutoFlushCrcErr:1;       //!<        If 1, automatically discard packets with CRC error from Rx queue
+      uint8_t :1;
+      uint8_t bIncludeHdr:1;            //!<        If 1, include the received header or length byte in the stored packet; otherwise discard it
+      uint8_t bIncludeCrc:1;            //!<        If 1, include the received CRC field in the stored packet; otherwise discard it
+      uint8_t bAppendRssi:1;            //!<        If 1, append an RSSI byte to the packet in the Rx queue
+      uint8_t bAppendTimestamp:1;       //!<        If 1, append a timestamp to the packet in the Rx queue
+      uint8_t bAppendStatus:1;          //!<        If 1, append a status byte to the packet in the Rx queue
+   } rxConf;                            //!<        Rx configuration
+   uint32_t syncWord0;                  //!<        Sync word to listen for
+   uint32_t syncWord1;                  //!<        Alternative sync word if non-zero
+   uint16_t maxPktLen;                  //!< \brief Packet length for fixed length, maximum packet length for variable length<br>
+                                        //!<        0: Unlimited or unknown length
+   struct {
+      uint16_t numHdrBits:6;            //!<        Number of bits in header (0&ndash;32)
+      uint16_t lenPos:5;                //!<        Position of length field in header (0&ndash;31)
+      uint16_t numLenBits:5;            //!<        Number of bits in length field (0&ndash;16)
+   } hdrConf;
+   struct {
+      uint16_t addrType:1;              //!< \brief 0: Address after header<br>
+                                        //!<        1: Address in header
+      uint16_t addrSize:5;              //!< \brief If <code>addrType</code> = 0: Address size in bytes<br>
+                                        //!<        If <code>addrType</code> = 1: Address size in bits
+      uint16_t addrPos:5;               //!< \brief If <code>addrType</code> = 1: Bit position of address in header<br>
+                                        //!<        If <code>addrType</code> = 0: Non-zero to extend address with sync word identifier
+      uint16_t numAddr:5;               //!<        Number of addresses in address list
+   } addrConf;
+   int8_t lenOffset;                    //!<        Signed value to add to length field
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } endTrigger;                        //!<        Trigger classifier for ending the operation
+   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> for ending the operation
+   uint8_t* pAddr;                      //!<        Pointer to address list
+   dataQueue_t* pQueue;                 //!<        Pointer to receive queue
+   uint8_t* pOutput;                    //!<        Pointer to output structure
+   struct {
+      uint8_t bEnaRssi:1;               //!<        If 1, enable RSSI as a criterion
+      uint8_t bEnaCorr:1;               //!<        If 1, enable correlation as a criterion
+      uint8_t operation:1;              //!< \brief 0: Busy if either RSSI or correlation indicates Busy<br>
+                                        //!<        1: Busy if both RSSI and correlation indicates Busy
+      uint8_t busyOp:1;                 //!< \brief 0: Continue carrier sense on channel Busy<br>
+                                        //!<        1: End carrier sense on channel Busy<br>
+                                        //!<        For an Rx command, the receiver will continue when carrier sense ends, but it will then not end if channel goes Idle
+      uint8_t idleOp:1;                 //!< \brief 0: Continue on channel Idle<br>
+                                        //!<        1: End on channel Idle
+      uint8_t timeoutRes:1;             //!< \brief 0: Timeout with channel state Invalid treated as Busy<br>
+                                        //!<        1: Timeout with channel state Invalid treated as Idle
+   } csConf;
+   int8_t rssiThr;                      //!<        RSSI threshold
+   uint8_t numRssiIdle;                 //!< \brief Number of consecutive RSSI measurements below the threshold needed before the channel is
+                                        //!<        declared Idle
+   uint8_t numRssiBusy;                 //!< \brief Number of consecutive RSSI measurements above the threshold needed before the channel is
+                                        //!<        declared Busy
+   uint16_t corrPeriod;                 //!<        Number of RAT ticks for a correlation observation periods
+   struct {
+      uint8_t numCorrInv:4;             //!< \brief Number of subsequent correlation tops with maximum <code>corrPeriod</code> RAT
+                                        //!<        ticks between them needed to go from Idle to Invalid
+      uint8_t numCorrBusy:4;            //!< \brief Number of subsequent correlation tops with maximum <code>corrPeriod</code> RAT
+                                        //!<        ticks between them needed to go from Invalid to Busy
+   } corrConfig;
+   struct {
+      uint8_t triggerType:4;            //!<        The type of trigger
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
+                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
+      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+                                        //!<        1: A trigger in the past is triggered as soon as possible
+   } csEndTrigger;                      //!<        Trigger classifier for ending the carrier sense
+   ratmr_t csEndTime;                   //!<        Time used together with <code>csEndTrigger</code> for ending the operation
 };
 
 //! @}

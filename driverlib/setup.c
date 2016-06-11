@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       setup.c
-*  Revised:        2015-07-03 16:22:15 +0200 (Fri, 03 Jul 2015)
-*  Revision:       44130
+*  Revised:        2016-04-07 15:04:05 +0200 (Thu, 07 Apr 2016)
+*  Revision:       46052
 *
 *  Description:    Setup file for CC13xx/CC26xx devices.
 *
@@ -95,10 +95,12 @@ static uint32_t GetTrimForXoscHfFastStart( void );
 static uint32_t GetTrimForXoscHfIbiastherm( void );
 static uint32_t GetTrimForXoscLfRegulatorAndCmirrwrRatio( uint32_t ui32Fcfg1Revision );
 
-static int32_t  SignExtendVddrTrimValue( uint32_t ui32VddrTrimVal );
+int32_t         SignExtendVddrTrimValue( uint32_t ui32VddrTrimVal );
 static void     HapiTrimDeviceColdReset( void );
 static void     HapiTrimDeviceShutDown( uint32_t ui32Fcfg1Revision );
 static void     HapiTrimDevicePowerDown( void );
+
+void            SetVddrLevel( uint32_t ccfg_ModeConfReg );
 
 
 //*****************************************************************************
@@ -120,14 +122,6 @@ static void     HapiTrimDevicePowerDown( void );
 //*****************************************************************************
 #define CPU_DELAY_MICRO_SECONDS( x ) \
    CPUdelay(((uint32_t)((( x ) * 48.0 ) / 5.0 )) - 1 )
-
-
-//*****************************************************************************
-// Need to know the CCFG:MODE_CONF.VDDR_TRIM_SLEEP_DELTA field width in order
-// to sign extend correctly but this is however not defined in the hardware
-// description fields and is therefore defined separately here.
-//*****************************************************************************
-#define CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_WIDTH    4
 
 
 //*****************************************************************************
@@ -386,6 +380,7 @@ HapiTrimDeviceShutDown(uint32_t ui32Fcfg1Revision)
     uint32_t   ccfgExtLfClk      ;
     int32_t    i32VddrSleepTrim  ;
     int32_t    i32VddrSleepDelta ;
+    uint32_t   fcfg1OscConf      ;
 
     //
     // Force AUX on and enable clocks
@@ -407,9 +402,7 @@ HapiTrimDeviceShutDown(uint32_t ui32Fcfg1Revision)
                                                 AUX_WUC_MODCLKEN0_AUX_ADI4;
 
     //
-    // It's found to be optimal to override the FCFG1..DCDC_IPEAK setting as follows:
-    // if ( alternative DCDC setting in CCFG is enabled )  ADI3..IPEAK = CCFG..DCDC_IPEAK
-    // else                                                ADI3..IPEAK = 2
+    // Check in CCFG for alternative DCDC setting
     //
     if (( HWREG( CCFG_BASE + CCFG_O_SIZE_AND_DIS_FLAGS ) & CCFG_SIZE_AND_DIS_FLAGS_DIS_ALT_DCDC_SETTING ) == 0 ) {
         //
@@ -420,9 +413,6 @@ HapiTrimDeviceShutDown(uint32_t ui32Fcfg1Revision)
         HWREGB( ADI3_BASE + ADI_O_MASK4B + ( ADI_3_REFSYS_O_DCDCCTL5 * 2 )) = ( 0xF0 |
             ( HWREG( CCFG_BASE + CCFG_O_MODE_CONF_1 ) >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_S ));
 
-    // Shall use FCFG1 setting for CC13xx
-    } else {
-        HWREGB( ADI3_BASE + ADI_O_MASK4B + ( ADI_3_REFSYS_O_DCDCCTL5 * 2 )) = 0x72;
     }
 
     //
@@ -436,22 +426,75 @@ HapiTrimDeviceShutDown(uint32_t ui32Fcfg1Revision)
     ccfg_ModeConfReg = HWREG( CCFG_BASE + CCFG_O_MODE_CONF );
 
     //
-    // Adjust the VDDR_TRIM_SLEEP value with value adjustable by customer (CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA)
+    // Check for CC13xx boost mode
+    // The combination VDDR_EXT_LOAD=0 and VDDS_BOD_LEVEL=1 is defined to selct boost mode
     //
-    i32VddrSleepTrim = SignExtendVddrTrimValue(( HWREG( FCFG1_BASE + FCFG1_O_LDO_TRIM ) &
-        FCFG1_LDO_TRIM_VDDR_TRIM_SLEEP_M ) >> FCFG1_LDO_TRIM_VDDR_TRIM_SLEEP_S );
+    if ((( ccfg_ModeConfReg & CCFG_MODE_CONF_VDDR_EXT_LOAD  ) == 0 ) &&
+        (( ccfg_ModeConfReg & CCFG_MODE_CONF_VDDS_BOD_LEVEL ) != 0 )    ) {
+        //
+        // Set VDDS_BOD trim - using masked write {MASK8:DATA8}
+        // - TRIM_VDDS_BOD is bits[7:3] of ADI3..REFSYSCTL1
+        // - Needs a positive transition on BOD_BG_TRIM_EN (bit[7] of REFSYSCTL3) to
+        //   latch new VDDS BOD. Set to 0 first to guarantee a positive transition.
+        //
+        HWREGB( ADI3_BASE + ADI_O_CLR + ADI_3_REFSYS_O_REFSYSCTL3 ) = ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+//        if ( ccfg_ModeConfReg & CCFG_MODE_CONF_VDDS_BOD_LEVEL ) {
+            //
+            // VDDS_BOD_LEVEL = 1 means that boost mode is selected
+            // - Max out the VDDS_BOD trim (=VDDS_BOD_POS_31)
+            //
+            HWREGH( ADI3_BASE + ADI_O_MASK8B + ( ADI_3_REFSYS_O_REFSYSCTL1 * 2 )) =
+                ( ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_M << 8 ) |
+                ( ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_POS_31 ) ;
+//        } else {
+//            //
+//            // VDDS_BOD_LEVEL = 0
+//            // - Set VDDS_BOD to FCFG1..TRIMBOD_H
+//            //
+//            HWREGH( ADI3_BASE + ADI_O_MASK8B + ( ADI_3_REFSYS_O_REFSYSCTL1 * 2 )) =
+//                ( ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_M << 8 ) |
+//                ((( HWREG( FCFG1_BASE + FCFG1_O_VOLT_TRIM ) &
+//                    FCFG1_VOLT_TRIM_TRIMBOD_H_M ) >>
+//                    FCFG1_VOLT_TRIM_TRIMBOD_H_S ) << ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_S );
+//        }
+        HWREGB( ADI3_BASE + ADI_O_SET + ADI_3_REFSYS_O_REFSYSCTL3 ) = ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+
+        SetVddrLevel( ccfg_ModeConfReg );
+
+        i32VddrSleepTrim = SignExtendVddrTrimValue((
+            HWREG( FCFG1_BASE + FCFG1_O_VOLT_TRIM ) &
+            FCFG1_VOLT_TRIM_VDDR_TRIM_SLEEP_H_M ) >>
+            FCFG1_VOLT_TRIM_VDDR_TRIM_SLEEP_H_S ) ;
+    } else
+    {
+        i32VddrSleepTrim = SignExtendVddrTrimValue((
+            HWREG( FCFG1_BASE + FCFG1_O_LDO_TRIM ) &
+            FCFG1_LDO_TRIM_VDDR_TRIM_SLEEP_M ) >>
+            FCFG1_LDO_TRIM_VDDR_TRIM_SLEEP_S ) ;
+    }
+
+    //
+    // Adjust the VDDR_TRIM_SLEEP value with value adjustable by customer (CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA)
     // Read and sign extend VddrSleepDelta (in range -8 to +7)
+    //
     i32VddrSleepDelta = ((((int32_t)ccfg_ModeConfReg )
-        << ( 32 - CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_WIDTH - CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_S ))
-        >> ( 32 - CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_WIDTH ));
+        << ( 32 - CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_W - CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_S ))
+        >> ( 32 - CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_W ));
     // Calculate new VDDR sleep trim
     i32VddrSleepTrim = ( i32VddrSleepTrim + i32VddrSleepDelta + 1 );
-    if ( i32VddrSleepTrim < -10 ) {
-        i32VddrSleepTrim = -10;
-    }
+    if ( i32VddrSleepTrim >  21 ) i32VddrSleepTrim =  21;
+    if ( i32VddrSleepTrim < -10 ) i32VddrSleepTrim = -10;
     // Write adjusted value using MASKED write (MASK8)
     HWREGH( ADI3_BASE + ADI_O_MASK8B + ( ADI_3_REFSYS_O_DCDCCTL1 * 2 )) = (( ADI_3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_M << 8 ) |
         (( i32VddrSleepTrim << ADI_3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_S ) & ADI_3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_M ));
+
+    //
+    // Do not allow DCDC to be enabled if in external regulator mode.
+    // Preventing this by setting both the RECHARGE and the ACTIVE bits bit in the CCFG_MODE_CONF copy register (ccfg_ModeConfReg).
+    //
+    if ( HWREG( AON_SYSCTL_BASE + AON_SYSCTL_O_PWRCTL ) & AON_SYSCTL_PWRCTL_EXT_REG_MODE ) {
+        ccfg_ModeConfReg |= ( CCFG_MODE_CONF_DCDC_RECHARGE_M | CCFG_MODE_CONF_DCDC_ACTIVE_M );
+    }
 
     //
     // set the RECHARGE source based upon CCFG:MODE_CONF:DCDC_RECHARGE
@@ -570,15 +613,63 @@ HapiTrimDeviceShutDown(uint32_t ui32Fcfg1Revision)
 
     // Setting FORCE_KICKSTART_EN (ref. CC26_V1_BUG00261). Should also be done for PG2
     // (This is bit 22 in DDI_0_OSC_O_CTL0)
-    HWREGB( AUX_DDI0_OSC_BASE + DDI_O_MASK4B + ( DDI_0_OSC_O_CTL0 * 2 ) + 5 ) = 0x44;
+    HWREG( AUX_DDI0_OSC_BASE + DDI_O_SET + DDI_0_OSC_O_CTL0 ) = DDI_0_OSC_CTL0_FORCE_KICKSTART_EN;
 
-    // XOSC source is a 24 MHz xtal (default)
-    // Set bit DDI_0_OSC_CTL0_XTAL_IS_24M (this is bit 31 in DDI_0_OSC_O_CTL0)
-    HWREGB( AUX_DDI0_OSC_BASE + DDI_O_MASK4B + ( DDI_0_OSC_O_CTL0 * 2 ) + 7 ) = 0x88;
+    //
+    // Examin the XOSC_FREQ field to select 0x1=HPOSC, 0x2=48MHz XOSC, 0x3=24MHz XOSC
+    //
+    switch (( ccfg_ModeConfReg & CCFG_MODE_CONF_XOSC_FREQ_M ) >> CCFG_MODE_CONF_XOSC_FREQ_S ) {
+    case 2 :
+        // XOSC source is a 48 MHz xtal
+        // Do nothing (since this is the reset setting)
+        break;
+    case 1 :
+        // XOSC source is HPOSC (trim the HPOSC if this is a chip with HPOSC, otherwise skip trimming and default to 24 MHz XOSC)
+
+        fcfg1OscConf = HWREG( FCFG1_BASE + FCFG1_O_OSC_CONF );
+
+        if (( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_OPTION ) == 0 ) {
+            // This is a HPOSC chip, apply HPOSC settings
+            // Set bit DDI_0_OSC_CTL0_HPOSC_MODE_EN (this is bit 14 in DDI_0_OSC_O_CTL0)
+            HWREG( AUX_DDI0_OSC_BASE + DDI_O_SET + DDI_0_OSC_O_CTL0 ) = DDI_0_OSC_CTL0_HPOSC_MODE_EN;
+
+            // ADI_2_REFSYS_HPOSCCTL2_BIAS_HOLD_MODE_EN = FCFG1_OSC_CONF_HPOSC_BIAS_HOLD_MODE_EN   (1 bit)
+            // ADI_2_REFSYS_HPOSCCTL2_CURRMIRR_RATIO    = FCFG1_OSC_CONF_HPOSC_CURRMIRR_RATIO      (4 bits)
+            // ADI_2_REFSYS_HPOSCCTL1_BIAS_RES_SET      = FCFG1_OSC_CONF_HPOSC_BIAS_RES_SET        (4 bits)
+            // ADI_2_REFSYS_HPOSCCTL0_FILTER_EN         = FCFG1_OSC_CONF_HPOSC_FILTER_EN           (1 bit)
+            // ADI_2_REFSYS_HPOSCCTL0_BIAS_RECHARGE_DLY = FCFG1_OSC_CONF_HPOSC_BIAS_RECHARGE_DELAY (2 bits)
+            // ADI_2_REFSYS_HPOSCCTL0_SERIES_CAP        = FCFG1_OSC_CONF_HPOSC_SERIES_CAP          (2 bits)
+            // ADI_2_REFSYS_HPOSCCTL0_DIV3_BYPASS       = FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS         (1 bit)
+
+            HWREG( ADI2_BASE + ADI_2_REFSYS_O_HPOSCCTL2 ) = (( HWREG( ADI2_BASE + ADI_2_REFSYS_O_HPOSCCTL2 ) &
+                  ~( ADI_2_REFSYS_HPOSCCTL2_BIAS_HOLD_MODE_EN_M | ADI_2_REFSYS_HPOSCCTL2_CURRMIRR_RATIO_M  )                                                                       ) |
+                   ((( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_BIAS_HOLD_MODE_EN_M   ) >> FCFG1_OSC_CONF_HPOSC_BIAS_HOLD_MODE_EN_S   ) << ADI_2_REFSYS_HPOSCCTL2_BIAS_HOLD_MODE_EN_S   ) |
+                   ((( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_CURRMIRR_RATIO_M      ) >> FCFG1_OSC_CONF_HPOSC_CURRMIRR_RATIO_S      ) << ADI_2_REFSYS_HPOSCCTL2_CURRMIRR_RATIO_S      )   );
+            HWREG( ADI2_BASE + ADI_2_REFSYS_O_HPOSCCTL1 ) = (( HWREG( ADI2_BASE + ADI_2_REFSYS_O_HPOSCCTL1 ) & ~( ADI_2_REFSYS_HPOSCCTL1_BIAS_RES_SET_M )                          ) |
+                   ((( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_BIAS_RES_SET_M        ) >> FCFG1_OSC_CONF_HPOSC_BIAS_RES_SET_S        ) << ADI_2_REFSYS_HPOSCCTL1_BIAS_RES_SET_S        )   );
+            HWREG( ADI2_BASE + ADI_2_REFSYS_O_HPOSCCTL0 ) = (( HWREG( ADI2_BASE + ADI_2_REFSYS_O_HPOSCCTL0 ) &
+                  ~( ADI_2_REFSYS_HPOSCCTL0_FILTER_EN_M | ADI_2_REFSYS_HPOSCCTL0_BIAS_RECHARGE_DLY_M | ADI_2_REFSYS_HPOSCCTL0_SERIES_CAP_M | ADI_2_REFSYS_HPOSCCTL0_DIV3_BYPASS_M )) |
+                   ((( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_FILTER_EN_M           ) >> FCFG1_OSC_CONF_HPOSC_FILTER_EN_S           ) << ADI_2_REFSYS_HPOSCCTL0_FILTER_EN_S           ) |
+                   ((( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_BIAS_RECHARGE_DELAY_M ) >> FCFG1_OSC_CONF_HPOSC_BIAS_RECHARGE_DELAY_S ) << ADI_2_REFSYS_HPOSCCTL0_BIAS_RECHARGE_DLY_S   ) |
+                   ((( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_SERIES_CAP_M          ) >> FCFG1_OSC_CONF_HPOSC_SERIES_CAP_S          ) << ADI_2_REFSYS_HPOSCCTL0_SERIES_CAP_S          ) |
+                   ((( fcfg1OscConf & FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS_M         ) >> FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS_S         ) << ADI_2_REFSYS_HPOSCCTL0_DIV3_BYPASS_S         )   );
+            break;
+        }
+        // Not a HPOSC chip - fall through to default
+    default :
+        // XOSC source is a 24 MHz xtal (default)
+        // Set bit DDI_0_OSC_CTL0_XTAL_IS_24M (this is bit 31 in DDI_0_OSC_O_CTL0)
+        HWREG( AUX_DDI0_OSC_BASE + DDI_O_SET + DDI_0_OSC_O_CTL0 ) = DDI_0_OSC_CTL0_XTAL_IS_24M;
+        break;
+    }
+
+    // Clear DDI_0_OSC_CTL0_CLK_LOSS_EN (ClockLossEventEnable()). This is bit 9 in DDI_0_OSC_O_CTL0.
+    // This is typically already 0 except on Lizard where it is set in ROM-boot
+    HWREG( AUX_DDI0_OSC_BASE + DDI_O_CLR + DDI_0_OSC_O_CTL0 ) = DDI_0_OSC_CTL0_CLK_LOSS_EN;
 
     // Setting DDI_0_OSC_CTL1_XOSC_HF_FAST_START according to value found in FCFG1
     ui32Trim = GetTrimForXoscHfFastStart();
-    HWREGB( AUX_DDI0_OSC_BASE + DDI_O_MASK4B + ( 0x00000004 * 2 )) = ( 0x30 | ui32Trim );
+    HWREGB( AUX_DDI0_OSC_BASE + DDI_O_MASK4B + ( DDI_0_OSC_O_CTL1 * 2 )) = ( 0x30 | ui32Trim );
 
     //
     // setup the LF clock based upon CCFG:MODE_CONF:SCLK_LF_OPTION
@@ -655,7 +746,7 @@ HapiTrimDeviceShutDown(uint32_t ui32Fcfg1Revision)
 //! \return
 //
 //*****************************************************************************
-static int32_t
+int32_t
 SignExtendVddrTrimValue( uint32_t ui32VddrTrimVal )
 {
     //
@@ -1091,7 +1182,7 @@ GetTrimForRadcExtCfg( uint32_t ui32Fcfg1Revision )
 
 //*****************************************************************************
 //
-//! \brief Returns the FCFG1_OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM.
+//! \brief Returns the FCFG1 OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM.
 //
 //*****************************************************************************
 static uint32_t
@@ -1127,4 +1218,70 @@ GetTrimForXoscLfRegulatorAndCmirrwrRatio( uint32_t ui32Fcfg1Revision )
    }
 
    return ( trimForXoscLfRegulatorAndCmirrwrRatioValue );
+}
+
+
+//*****************************************************************************
+//
+// SetVddrLevel()
+// Set VDDR boost mode (by setting VDDR_TRIM to FCFG1..VDDR_TRIM_HH and setting VDDS_BOD to max)
+//
+//*****************************************************************************
+void
+SetVddrLevel( uint32_t ccfg_ModeConfReg )
+{
+   uint32_t newTrimRaw        ;
+   int32_t  targetTrim        ;
+   int32_t  currentTrim       ;
+   int32_t  deltaTrim         ;
+
+//   if ( ccfg_ModeConfReg & CCFG_MODE_CONF_VDDS_BOD_LEVEL ) {
+      //
+      // VDDS_BOD_LEVEL = 1 means that boost mode is selected
+      // - Step up VDDR_TRIM to FCFG1..VDDR_TRIM_HH
+      //
+      newTrimRaw = (( HWREG( FCFG1_BASE + FCFG1_O_VOLT_TRIM ) &
+         FCFG1_VOLT_TRIM_VDDR_TRIM_HH_M ) >>
+         FCFG1_VOLT_TRIM_VDDR_TRIM_HH_S ) ;
+//   } else {
+//      //
+//      // VDDS_BOD_LEVEL = 0
+//      // - Step up VDDR_TRIM to FCFG1..VDDR_TRIM_H
+//      //
+//      newTrimRaw = (( HWREG( FCFG1_BASE + FCFG1_O_VOLT_TRIM ) &
+//         FCFG1_VOLT_TRIM_VDDR_TRIM_H_M ) >>
+//         FCFG1_VOLT_TRIM_VDDR_TRIM_H_S ) ;
+//   }
+   targetTrim  = SignExtendVddrTrimValue( newTrimRaw );
+   currentTrim = SignExtendVddrTrimValue((
+      HWREGB( ADI3_BASE + ADI_3_REFSYS_O_DCDCCTL0 ) &
+      ADI_3_REFSYS_DCDCCTL0_VDDR_TRIM_M ) >>
+      ADI_3_REFSYS_DCDCCTL0_VDDR_TRIM_S ) ;
+
+   if ( currentTrim != targetTrim ) {
+      // Disable VDDR BOD
+      HWREGBITW( AON_SYSCTL_BASE + AON_SYSCTL_O_RESETCTL, AON_SYSCTL_RESETCTL_VDDR_LOSS_EN_BITN ) = 0;
+
+      while ( currentTrim != targetTrim ) {
+         deltaTrim = targetTrim - currentTrim;
+         if ( deltaTrim >  2 ) deltaTrim =  2;
+         if ( deltaTrim < -2 ) deltaTrim = -2;
+         currentTrim += deltaTrim;
+
+         HWREG( AON_RTC_BASE + AON_RTC_O_SYNC ); // Wait one SCLK_LF period
+
+         HWREGH( ADI3_BASE + ADI_O_MASK8B + ( ADI_3_REFSYS_O_DCDCCTL0 * 2 )) =
+            ( ADI_3_REFSYS_DCDCCTL0_VDDR_TRIM_M << 8 ) | (( currentTrim <<
+            ADI_3_REFSYS_DCDCCTL0_VDDR_TRIM_S ) &
+            ADI_3_REFSYS_DCDCCTL0_VDDR_TRIM_M ) ;
+
+         HWREG( AON_RTC_BASE + AON_RTC_O_SYNC ) = 1; // Force SCLK_LF period wait on next read
+      }
+
+      HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // Wait one SCLK_LF period
+      HWREG( AON_RTC_BASE + AON_RTC_O_SYNC ) = 1; // Force SCLK_LF period wait on next read
+      HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // Wait one more SCLK_LF period before re-enabling VDDR BOD
+      HWREGBITW( AON_SYSCTL_BASE + AON_SYSCTL_O_RESETCTL, AON_SYSCTL_RESETCTL_VDDR_LOSS_EN_BITN ) = 1;
+      HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // And finally wait for VDDR_LOSS_EN setting to propagate
+   }
 }

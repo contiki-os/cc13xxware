@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       rf_common_cmd.h
-*  Revised:        2015-08-04 10:40:45 +0200 (Tue, 04 Aug 2015)
-*  Revision:       44326
+*  Revised:        2016-04-07 15:04:05 +0200 (Thu, 07 Apr 2016)
+*  Revision:       46052
 *
 *  Description:    CC13xx API for common/generic commands
 *
@@ -74,7 +74,6 @@ typedef struct __RFC_STRUCT rfc_CMD_FS_POWERDOWN_s rfc_CMD_FS_POWERDOWN_t;
 typedef struct __RFC_STRUCT rfc_CMD_SCH_IMM_s rfc_CMD_SCH_IMM_t;
 typedef struct __RFC_STRUCT rfc_CMD_COUNT_BRANCH_s rfc_CMD_COUNT_BRANCH_t;
 typedef struct __RFC_STRUCT rfc_CMD_PATTERN_CHECK_s rfc_CMD_PATTERN_CHECK_t;
-typedef struct __RFC_STRUCT rfc_CMD_TX_POWER_BOOST_s rfc_CMD_TX_POWER_BOOST_t;
 typedef struct __RFC_STRUCT rfc_CMD_ABORT_s rfc_CMD_ABORT_t;
 typedef struct __RFC_STRUCT rfc_CMD_STOP_s rfc_CMD_STOP_t;
 typedef struct __RFC_STRUCT rfc_CMD_GET_RSSI_s rfc_CMD_GET_RSSI_t;
@@ -83,6 +82,7 @@ typedef struct __RFC_STRUCT rfc_CMD_TRIGGER_s rfc_CMD_TRIGGER_t;
 typedef struct __RFC_STRUCT rfc_CMD_GET_FW_INFO_s rfc_CMD_GET_FW_INFO_t;
 typedef struct __RFC_STRUCT rfc_CMD_START_RAT_s rfc_CMD_START_RAT_t;
 typedef struct __RFC_STRUCT rfc_CMD_PING_s rfc_CMD_PING_t;
+typedef struct __RFC_STRUCT rfc_CMD_READ_RFREG_s rfc_CMD_READ_RFREG_t;
 typedef struct __RFC_STRUCT rfc_CMD_ADD_DATA_ENTRY_s rfc_CMD_ADD_DATA_ENTRY_t;
 typedef struct __RFC_STRUCT rfc_CMD_REMOVE_DATA_ENTRY_s rfc_CMD_REMOVE_DATA_ENTRY_t;
 typedef struct __RFC_STRUCT rfc_CMD_FLUSH_QUEUE_s rfc_CMD_FLUSH_QUEUE_t;
@@ -201,16 +201,17 @@ struct __RFC_STRUCT rfc_CMD_RADIO_SETUP_s {
                                         //!<        Others: <i>Reserved</i>
       uint16_t biasMode:1;              //!< \brief 0: Internal bias<br>
                                         //!<        1: External bias
-      uint16_t :6;
+      uint16_t analogCfgMode:6;         //!< \brief 0x00: Write analog configuration.<br>
+                                        //!<        Required first time after boot and when changing frequency band
+                                        //!<        or front-end configuration<br>
+                                        //!<        0x2D: Keep analog configuration.<br>
+                                        //!<        May be used after standby or when changing mode with the same frequency
+                                        //!<        band and front-end configuration<br>
+                                        //!<        Others: <i>Reserved</i>
       uint16_t bNoFsPowerUp:1;          //!< \brief 0: Power up frequency synth<br>
                                         //!<        1: Do not power up frequency synth
    } config;                            //!<        Configuration options
-   struct {
-      uint16_t IB:6;                    //!<        Value to write to the PA power control field at 25 &deg;C
-      uint16_t GC:2;                    //!<        Value to write to the gain control of the 1st stage of the PA
-      uint16_t boost:1;                 //!<        Value of boost bit in synth
-      uint16_t tempCoeff:7;             //!<        Temperature coefficient for IB. 0: No temperature compensation
-   } txPower;                           //!<        Transmit power
+   uint16_t txPower;                    //!<        Transmit power
    uint32_t* pRegOverride;              //!< \brief Pointer to a list of hardware and configuration registers to override. If NULL, no
                                         //!<        override is used.
 };
@@ -732,41 +733,6 @@ struct __RFC_STRUCT rfc_CMD_PATTERN_CHECK_s {
 
 //! @}
 
-//! \addtogroup CMD_TX_POWER_BOOST
-//! @{
-#define CMD_TX_POWER_BOOST                                      0x0816
-struct __RFC_STRUCT rfc_CMD_TX_POWER_BOOST_s {
-   uint16_t commandNo;                  //!<        The command ID number 0x0816
-   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
-                                        //!<        updated by the radio CPU during operation and may be read by the
-                                        //!<        system CPU at any time.
-   rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
-   ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
-   struct {
-      uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
-                                        //!<        1: CMD_TRIGGER can be used as an alternative trigger
-      uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
-                                        //!<        1: A trigger in the past is triggered as soon as possible
-   } startTrigger;                      //!<        Identification of the trigger that starts the operation
-   struct {
-      uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
-   } condition;
-   uint8_t vddrLevel;                   //!< \brief VDDR level to set<br>
-                                        //!<        0xFD: Trim VDDR voltage to normal level (VDDR_TRIM), nominally 1.68 V<br>
-                                        //!<        0xFE: Trim VDDR voltage to high level (VDDR_TRIM_H), nominally 1.85 V<br>
-                                        //!<        0xFF: Trim VDDR voltage to higher level (VDDR_TRIM_HH), nominally 1.95 V<br>
-                                        //!<        Other: reserved
-   uint8_t paTrimValue;                 //!< \brief Optional power amplifier trim setting manipulation<br>
-                                        //!<        0x00-0x1F: Value to write in ADI_0_RF:PACTL0.TRIM register field<br>
-                                        //!<        0xFE: Set PACTL0.TRIM to its default value from FCFG1<br>
-                                        //!<        0xFF: Do not write PACTL0.TRIM, use the setting that is already applied<br>
-};
-
-//! @}
-
 //! \addtogroup CMD_ABORT
 //! @{
 #define CMD_ABORT                                               0x0401
@@ -842,6 +808,17 @@ struct __RFC_STRUCT rfc_CMD_START_RAT_s {
 #define CMD_PING                                                0x0406
 struct __RFC_STRUCT rfc_CMD_PING_s {
    uint16_t commandNo;                  //!<        The command ID number 0x0406
+};
+
+//! @}
+
+//! \addtogroup CMD_READ_RFREG
+//! @{
+#define CMD_READ_RFREG                                          0x0601
+struct __RFC_STRUCT rfc_CMD_READ_RFREG_s {
+   uint16_t commandNo;                  //!<        The command ID number 0x0601
+   uint16_t address;                    //!<        The offset from the start of the RF core HW register bank (0x40040000)
+   uint32_t value;                      //!<        Returned value of the register
 };
 
 //! @}
@@ -1009,7 +986,11 @@ struct __RFC_STRUCT rfc_CMD_SET_TX_POWER_s {
 #define CMD_UPDATE_FS                                           0x0011
 struct __RFC_STRUCT rfc_CMD_UPDATE_FS_s {
    uint16_t commandNo;                  //!<        The command ID number 0x0011
-   uint16_t frequency;                  //!<        The frequency in MHz to tune to
+   uint16_t __dummy0;
+   uint32_t __dummy1;
+   uint32_t __dummy2;
+   uint16_t __dummy3;
+   uint16_t frequency;                  //!<        The frequency in MHz to tune to, compensated for LO divider setting
    uint16_t fractFreq;                  //!<        Fractional part of the frequency to tune to
 };
 
