@@ -1,11 +1,11 @@
 /******************************************************************************
 *  Filename:       rfc.c
-*  Revised:        2016-04-07 15:04:05 +0200 (Thu, 07 Apr 2016)
-*  Revision:       46052
+*  Revised:        2016-05-27 08:27:46 +0200 (Fri, 27 May 2016)
+*  Revision:       46517
 *
 *  Description:    Driver for the RF Core.
 *
-*  Copyright (c) 2015, Texas Instruments Incorporated
+*  Copyright (c) 2015 - 2016, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,32 @@
 ******************************************************************************/
 
 #include <driverlib/rfc.h>
+#include <string.h>
+
+//*****************************************************************************
+//
+// Handle support for DriverLib in ROM:
+// This section will undo prototype renaming made in the header file
+//
+//*****************************************************************************
+#if !defined(DOXYGEN)
+    #undef  RFCCpeIntGetAndClear
+    #define RFCCpeIntGetAndClear            NOROM_RFCCpeIntGetAndClear
+    #undef  RFCDoorbellSendTo
+    #define RFCDoorbellSendTo               NOROM_RFCDoorbellSendTo
+    #undef  RFCSynthPowerDown
+    #define RFCSynthPowerDown               NOROM_RFCSynthPowerDown
+    #undef  RFCRfTrimRead
+    #define RFCRfTrimRead                   NOROM_RFCRfTrimRead
+    #undef  RFCRfTrimSet
+    #define RFCRfTrimSet                    NOROM_RFCRfTrimSet
+    #undef  RFCRTrim
+    #define RFCRTrim                        NOROM_RFCRTrim
+    #undef  RFCCPEPatchReset
+    #define RFCCPEPatchReset                NOROM_RFCCPEPatchReset
+    #undef  RFCAdi3VcoLdoVoltageMode
+    #define RFCAdi3VcoLdoVoltageMode        NOROM_RFCAdi3VcoLdoVoltageMode
+#endif
 
 #define RFC_RESERVED0               0x40044108
 #define RFC_RESERVED1               0x40044114
@@ -47,19 +73,27 @@
 #define CONFIG_MISC_ADC_DIVIDER             27
 #define CONFIG_MISC_ADC_DIVIDER_BM  0xF8000000U
 
-// RTrim positions
-#define FCFG1_O_CONFIG_MISC_ADC_PO_TAIL_RES_TRIM_M 0x003C0000
-#define FCFG1_O_CONFIG_MISC_ADC_PO_TAIL_RES_TRIM_S 18
-#define FCFG1_O_CONFIG_MISC_ADC_DIV6_PO_TAIL_RES_TRIM_M 0x003C0000
-#define FCFG1_O_CONFIG_MISC_ADC_DIV6_PO_TAIL_RES_TRIM_S 18
-#define FCFG1_O_CONFIG_MISC_ADC_DIV10_PO_TAIL_RES_TRIM_M 0x003C0000
-#define FCFG1_O_CONFIG_MISC_ADC_DIV10_PO_TAIL_RES_TRIM_S 18
-#define FCFG1_O_CONFIG_MISC_ADC_DIV12_PO_TAIL_RES_TRIM_M 0x003C0000
-#define FCFG1_O_CONFIG_MISC_ADC_DIV12_PO_TAIL_RES_TRIM_S 18
-#define FCFG1_O_CONFIG_MISC_ADC_DIV15_PO_TAIL_RES_TRIM_M 0x003C0000
-#define FCFG1_O_CONFIG_MISC_ADC_DIV15_PO_TAIL_RES_TRIM_S 18
-#define FCFG1_O_CONFIG_MISC_ADC_DIV30_PO_TAIL_RES_TRIM_M 0x003C0000
-#define FCFG1_O_CONFIG_MISC_ADC_DIV30_PO_TAIL_RES_TRIM_S 18
+#define _CPERAM_START 0x21000000
+#define _PARSER_PATCH_TAB_OFFSET 0x0338
+#define _PATCH_TAB_OFFSET 0x0340
+#define _IRQPATCH_OFFSET 0x03BC
+#define _PATCH_VEC_OFFSET 0x041C
+
+static const uint16_t rfc_defaultIrqAddr[] =
+{
+   0x3bc3,
+   0x3a3d,
+   0x3a5d,
+   0x3a71,
+   0x0aa1,
+   0x3a8f,
+   0x3b0f,
+   0x09b3,
+   0x5e49,
+   0x0a85,
+   0x3b2f,
+   0x3b85,
+};
 
 //*****************************************************************************
 //
@@ -263,36 +297,36 @@ void RFCRTrim(rfc_radioOp_t *pOpSetup)
     {
     case 2:
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_CONFIG_MISC_ADC)
-                       & FCFG1_O_CONFIG_MISC_ADC_PO_TAIL_RES_TRIM_M) >> FCFG1_O_CONFIG_MISC_ADC_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_M) >> FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_S;
         break;
     case 5:
         // Legacy
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_MISC_OTP_DATA)
-                       & FCFG1_MISC_OTP_DATA_PO_TAIL_RES_TRIM_M) >> FCFG1_MISC_OTP_DATA_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_MISC_OTP_DATA_MIN_ALLOWED_RTRIM_DIV5_M) >> FCFG1_MISC_OTP_DATA_MIN_ALLOWED_RTRIM_DIV5_S;
         break;
     case 6:
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_CONFIG_MISC_ADC_DIV6)
-                       & FCFG1_O_CONFIG_MISC_ADC_DIV6_PO_TAIL_RES_TRIM_M) >> FCFG1_O_CONFIG_MISC_ADC_DIV6_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_CONFIG_MISC_ADC_DIV6_MIN_ALLOWED_RTRIM_M) >> FCFG1_CONFIG_MISC_ADC_DIV6_MIN_ALLOWED_RTRIM_S;
         break;
     case 10:
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_CONFIG_MISC_ADC_DIV10)
-                       & FCFG1_O_CONFIG_MISC_ADC_DIV10_PO_TAIL_RES_TRIM_M) >> FCFG1_O_CONFIG_MISC_ADC_DIV10_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_CONFIG_MISC_ADC_DIV10_MIN_ALLOWED_RTRIM_M) >> FCFG1_CONFIG_MISC_ADC_DIV10_MIN_ALLOWED_RTRIM_S;
         break;
     case 12:
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_CONFIG_MISC_ADC_DIV12)
-                       & FCFG1_O_CONFIG_MISC_ADC_DIV12_PO_TAIL_RES_TRIM_M) >> FCFG1_O_CONFIG_MISC_ADC_DIV12_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_CONFIG_MISC_ADC_DIV12_MIN_ALLOWED_RTRIM_M) >> FCFG1_CONFIG_MISC_ADC_DIV12_MIN_ALLOWED_RTRIM_S;
         break;
     case 15:
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_CONFIG_MISC_ADC_DIV15)
-                       & FCFG1_O_CONFIG_MISC_ADC_DIV15_PO_TAIL_RES_TRIM_M) >> FCFG1_O_CONFIG_MISC_ADC_DIV15_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_CONFIG_MISC_ADC_DIV15_MIN_ALLOWED_RTRIM_M) >> FCFG1_CONFIG_MISC_ADC_DIV15_MIN_ALLOWED_RTRIM_S;
         break;
     case 30:
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_CONFIG_MISC_ADC_DIV30)
-                       & FCFG1_O_CONFIG_MISC_ADC_DIV30_PO_TAIL_RES_TRIM_M) >> FCFG1_O_CONFIG_MISC_ADC_DIV30_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_M) >> FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_S;
         break;
     default:
         fcfg1_rtrim = (HWREG(FCFG1_BASE + FCFG1_O_CONFIG_MISC_ADC)
-                       & FCFG1_O_CONFIG_MISC_ADC_PO_TAIL_RES_TRIM_M) >> FCFG1_O_CONFIG_MISC_ADC_PO_TAIL_RES_TRIM_S;
+                       & FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_M) >> FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_S;
         break;
     }
 
@@ -346,6 +380,49 @@ void RFCRfTrimSet(rfTrim_t* pRfTrim)
 
 //*****************************************************************************
 //
+// Reset previously patched CPE RAM to a state where it can be patched again
+//
+//*****************************************************************************
+void RFCCPEPatchReset(void)
+{
+    uint8_t *pPatchTab = (uint8_t *) (_CPERAM_START + _PARSER_PATCH_TAB_OFFSET);
+    uint32_t *pIrqPatch = (uint32_t *) (_CPERAM_START + _IRQPATCH_OFFSET);
+
+    memset(pPatchTab, 0xFF, _IRQPATCH_OFFSET - _PARSER_PATCH_TAB_OFFSET);
+
+	int i;
+    for (i = 0; i < sizeof(rfc_defaultIrqAddr)/sizeof(rfc_defaultIrqAddr[0]); i++)
+    {
+        pIrqPatch[i * 2 + 1] = rfc_defaultIrqAddr[i];
+    }
+}
+
+
+//*****************************************************************************
+//
+// Function to set VCOLDO reference to voltage mode
+//
+//*****************************************************************************
+void RFCAdi3VcoLdoVoltageMode(bool bEnable)
+{
+    if (bEnable)
+    {
+        // First make sure the REFSYSCTL0 mux output is not further muxed out
+        HWREGB(0x40086200) = 0x0;
+        // Set the REFSYSCTL0 mux as desired for VCOLDO voltage mode
+        HWREGB(ADI3_BASE + ADI_O_DIR + ADI_3_REFSYS_O_REFSYSCTL0) = ADI_3_REFSYS_REFSYSCTL0_TESTCTL_VREF0P8V;
+    }
+    else
+    {
+        // Revert the mux override
+        HWREGB(ADI3_BASE + ADI_O_DIR + ADI_3_REFSYS_O_REFSYSCTL0) = ADI_3_REFSYS_REFSYSCTL0_TESTCTL_NC;
+    }
+}
+
+
+
+//*****************************************************************************
+//
 // Handle support for DriverLib in ROM:
 // This section will undo prototype renaming made in the header file
 //
@@ -363,6 +440,10 @@ void RFCRfTrimSet(rfTrim_t* pRfTrim)
     #define RFCRfTrimSet                    NOROM_RFCRfTrimSet
     #undef  RFCRTrim
     #define RFCRTrim                        NOROM_RFCRTrim
+    #undef  RFCCPEPatchReset
+    #define RFCCPEPatchReset                NOROM_RFCCPEPatchReset
+    #undef  RFCAdi3VcoLdoVoltageMode
+    #define RFCAdi3VcoLdoVoltageMode        NOROM_RFCAdi3VcoLdoVoltageMode
 #endif
 
 // See rfc.h for implementation

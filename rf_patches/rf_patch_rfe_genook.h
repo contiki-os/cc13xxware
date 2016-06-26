@@ -1,11 +1,11 @@
 /******************************************************************************
 *  Filename:       rf_patch_rfe_genook.h
-*  Revised:        2015-11-16 13:15:59 +0100 (Mon, 11 Sep 2015)
-*  Revision:       
+*  Revised:        $Date: 2016-06-08 15:35:28 +0200 (on, 08 jun 2016) $
+*  Revision:       $Revision: 17220 $
 *
-*  Description:    Patch for CC13XX Generic OOK
+*  Description: RF core patch for CC13XX Generic OOK
 *
-*  Copyright (c) 2015, Texas Instruments Incorporated
+*  Copyright (c) 2015-2016, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 ******************************************************************************/
+
 
 #ifndef _RF_PATCH_RFE_GENOOK_H
 #define _RF_PATCH_RFE_GENOOK_H

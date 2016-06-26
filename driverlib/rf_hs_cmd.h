@@ -1,11 +1,11 @@
 /******************************************************************************
 *  Filename:       rf_hs_cmd.h
-*  Revised:        2016-02-18 12:46:56 +0100 (Thu, 18 Feb 2016)
-*  Revision:       45712
+*  Revised:        $ $
+*  Revision:       $ $
 *
-*  Description:    CC13xx API for high-speed mode commands
+*  Description:    CC26xx/CC13xx API for high-speed mode commands
 *
-*  Copyright (c) 2015, Texas Instruments Incorporated
+*  Copyright (c) 2015 - 2016, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@ typedef struct __RFC_STRUCT rfc_hsRxStatus_s rfc_hsRxStatus_t;
 //! \addtogroup CMD_HS_TX
 //! @{
 #define CMD_HS_TX                                               0x3841
+//! High-Speed Transmit Command
 struct __RFC_STRUCT rfc_CMD_HS_TX_s {
    uint16_t commandNo;                  //!<        The command ID number 0x3841
    uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
@@ -82,7 +83,7 @@ struct __RFC_STRUCT rfc_CMD_HS_TX_s {
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
    struct {
       uint8_t bFsOff:1;                 //!< \brief 0: Keep frequency synth on after command<br>
@@ -103,6 +104,7 @@ struct __RFC_STRUCT rfc_CMD_HS_TX_s {
 //! \addtogroup CMD_HS_RX
 //! @{
 #define CMD_HS_RX                                               0x3842
+//! High-Speed Receive Command
 struct __RFC_STRUCT rfc_CMD_HS_RX_s {
    uint16_t commandNo;                  //!<        The command ID number 0x3842
    uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
@@ -120,7 +122,7 @@ struct __RFC_STRUCT rfc_CMD_HS_RX_s {
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
    struct {
       uint8_t bFsOff:1;                 //!< \brief 0: Keep frequency synth on after command<br>

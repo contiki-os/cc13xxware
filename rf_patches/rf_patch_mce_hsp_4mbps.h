@@ -1,11 +1,11 @@
 /******************************************************************************
 *  Filename:       rf_patch_mce_hsp_4mbps.h
-*  Revised:        2016-02-16 13:15:59 +0100 (Tue, 16 Feb 2016)
-*  Revision:       
+*  Revised:        $Date: 2016-06-08 15:35:28 +0200 (on, 08 jun 2016) $
+*  Revision:       $Revision: 17220 $
 *
-*  Description:    Patch for CC13XX High speed mode
+*  Description: RF core patch for CC13XX 4Mbps High speed mode
 *
-*  Copyright (c) 2016, Texas Instruments Incorporated
+*  Copyright (c) 2015-2016, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without

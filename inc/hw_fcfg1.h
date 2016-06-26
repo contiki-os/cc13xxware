@@ -1,9 +1,9 @@
 /******************************************************************************
 *  Filename:       hw_fcfg1_h
-*  Revised:        2015-12-07 09:51:56 +0100 (Mon, 07 Dec 2015)
-*  Revision:       45264
+*  Revised:        2016-04-27 10:32:23 +0200 (Wed, 27 Apr 2016)
+*  Revision:       46156
 *
-* Copyright (c) 2015, Texas Instruments Incorporated
+* Copyright (c) 2015 - 2016, Texas Instruments Incorporated
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -553,6 +553,14 @@
 // Register: FCFG1_O_CONFIG_SYNTH_DIV5
 //
 //*****************************************************************************
+// Field:    [28] DISABLE_CORNER_CAP
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_SYNTH_DIV5_DISABLE_CORNER_CAP                  0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV5_DISABLE_CORNER_CAP_BITN                     28
+#define FCFG1_CONFIG_SYNTH_DIV5_DISABLE_CORNER_CAP_M                0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV5_DISABLE_CORNER_CAP_S                        28
+
 // Field: [27:12] RFC_MDM_DEMIQMC0
 //
 // Trim value for RF Core.
@@ -580,6 +588,14 @@
 // Register: FCFG1_O_CONFIG_SYNTH_DIV6
 //
 //*****************************************************************************
+// Field:    [28] DISABLE_CORNER_CAP
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_SYNTH_DIV6_DISABLE_CORNER_CAP                  0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV6_DISABLE_CORNER_CAP_BITN                     28
+#define FCFG1_CONFIG_SYNTH_DIV6_DISABLE_CORNER_CAP_M                0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV6_DISABLE_CORNER_CAP_S                        28
+
 // Field: [27:12] RFC_MDM_DEMIQMC0
 //
 // Trim value for RF Core.
@@ -607,6 +623,14 @@
 // Register: FCFG1_O_CONFIG_SYNTH_DIV10
 //
 //*****************************************************************************
+// Field:    [28] DISABLE_CORNER_CAP
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_SYNTH_DIV10_DISABLE_CORNER_CAP                 0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV10_DISABLE_CORNER_CAP_BITN                    28
+#define FCFG1_CONFIG_SYNTH_DIV10_DISABLE_CORNER_CAP_M               0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV10_DISABLE_CORNER_CAP_S                       28
+
 // Field: [27:12] RFC_MDM_DEMIQMC0
 //
 // Trim value for RF Core.
@@ -634,6 +658,14 @@
 // Register: FCFG1_O_CONFIG_SYNTH_DIV12
 //
 //*****************************************************************************
+// Field:    [28] DISABLE_CORNER_CAP
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_SYNTH_DIV12_DISABLE_CORNER_CAP                 0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV12_DISABLE_CORNER_CAP_BITN                    28
+#define FCFG1_CONFIG_SYNTH_DIV12_DISABLE_CORNER_CAP_M               0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV12_DISABLE_CORNER_CAP_S                       28
+
 // Field: [27:12] RFC_MDM_DEMIQMC0
 //
 // Trim value for RF Core.
@@ -661,6 +693,14 @@
 // Register: FCFG1_O_CONFIG_SYNTH_DIV15
 //
 //*****************************************************************************
+// Field:    [28] DISABLE_CORNER_CAP
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_SYNTH_DIV15_DISABLE_CORNER_CAP                 0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV15_DISABLE_CORNER_CAP_BITN                    28
+#define FCFG1_CONFIG_SYNTH_DIV15_DISABLE_CORNER_CAP_M               0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV15_DISABLE_CORNER_CAP_S                       28
+
 // Field: [27:12] RFC_MDM_DEMIQMC0
 //
 // Trim value for RF Core.
@@ -688,6 +728,14 @@
 // Register: FCFG1_O_CONFIG_SYNTH_DIV30
 //
 //*****************************************************************************
+// Field:    [28] DISABLE_CORNER_CAP
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_SYNTH_DIV30_DISABLE_CORNER_CAP                 0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV30_DISABLE_CORNER_CAP_BITN                    28
+#define FCFG1_CONFIG_SYNTH_DIV30_DISABLE_CORNER_CAP_M               0x10000000
+#define FCFG1_CONFIG_SYNTH_DIV30_DISABLE_CORNER_CAP_S                       28
+
 // Field: [27:12] RFC_MDM_DEMIQMC0
 //
 // Trim value for RF Core.
@@ -715,6 +763,13 @@
 // Register: FCFG1_O_CONFIG_MISC_ADC_DIV5
 //
 //*****************************************************************************
+// Field: [21:18] MIN_ALLOWED_RTRIM
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_MISC_ADC_DIV5_MIN_ALLOWED_RTRIM_W                       4
+#define FCFG1_CONFIG_MISC_ADC_DIV5_MIN_ALLOWED_RTRIM_M              0x003C0000
+#define FCFG1_CONFIG_MISC_ADC_DIV5_MIN_ALLOWED_RTRIM_S                      18
+
 // Field:  [16:9] RSSI_OFFSET
 //
 // Internal. Only to be used through TI provided API.
@@ -741,6 +796,13 @@
 // Register: FCFG1_O_CONFIG_MISC_ADC_DIV6
 //
 //*****************************************************************************
+// Field: [21:18] MIN_ALLOWED_RTRIM
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_MISC_ADC_DIV6_MIN_ALLOWED_RTRIM_W                       4
+#define FCFG1_CONFIG_MISC_ADC_DIV6_MIN_ALLOWED_RTRIM_M              0x003C0000
+#define FCFG1_CONFIG_MISC_ADC_DIV6_MIN_ALLOWED_RTRIM_S                      18
+
 // Field:  [16:9] RSSI_OFFSET
 //
 // Internal. Only to be used through TI provided API.
@@ -767,6 +829,13 @@
 // Register: FCFG1_O_CONFIG_MISC_ADC_DIV10
 //
 //*****************************************************************************
+// Field: [21:18] MIN_ALLOWED_RTRIM
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_MISC_ADC_DIV10_MIN_ALLOWED_RTRIM_W                      4
+#define FCFG1_CONFIG_MISC_ADC_DIV10_MIN_ALLOWED_RTRIM_M             0x003C0000
+#define FCFG1_CONFIG_MISC_ADC_DIV10_MIN_ALLOWED_RTRIM_S                     18
+
 // Field:  [16:9] RSSI_OFFSET
 //
 // Internal. Only to be used through TI provided API.
@@ -793,6 +862,13 @@
 // Register: FCFG1_O_CONFIG_MISC_ADC_DIV12
 //
 //*****************************************************************************
+// Field: [21:18] MIN_ALLOWED_RTRIM
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_MISC_ADC_DIV12_MIN_ALLOWED_RTRIM_W                      4
+#define FCFG1_CONFIG_MISC_ADC_DIV12_MIN_ALLOWED_RTRIM_M             0x003C0000
+#define FCFG1_CONFIG_MISC_ADC_DIV12_MIN_ALLOWED_RTRIM_S                     18
+
 // Field:  [16:9] RSSI_OFFSET
 //
 // Internal. Only to be used through TI provided API.
@@ -819,6 +895,13 @@
 // Register: FCFG1_O_CONFIG_MISC_ADC_DIV15
 //
 //*****************************************************************************
+// Field: [21:18] MIN_ALLOWED_RTRIM
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_MISC_ADC_DIV15_MIN_ALLOWED_RTRIM_W                      4
+#define FCFG1_CONFIG_MISC_ADC_DIV15_MIN_ALLOWED_RTRIM_M             0x003C0000
+#define FCFG1_CONFIG_MISC_ADC_DIV15_MIN_ALLOWED_RTRIM_S                     18
+
 // Field:  [16:9] RSSI_OFFSET
 //
 // Internal. Only to be used through TI provided API.
@@ -845,6 +928,13 @@
 // Register: FCFG1_O_CONFIG_MISC_ADC_DIV30
 //
 //*****************************************************************************
+// Field: [21:18] MIN_ALLOWED_RTRIM
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_W                      4
+#define FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_M             0x003C0000
+#define FCFG1_CONFIG_MISC_ADC_DIV30_MIN_ALLOWED_RTRIM_S                     18
+
 // Field:  [16:9] RSSI_OFFSET
 //
 // Internal. Only to be used through TI provided API.
@@ -1914,12 +2004,12 @@
 #define FCFG1_MISC_OTP_DATA_PER_E_M                                 0x00007000
 #define FCFG1_MISC_OTP_DATA_PER_E_S                                         12
 
-// Field:  [11:8] PO_TAIL_RES_TRIM
+// Field:  [11:8] MIN_ALLOWED_RTRIM_DIV5
 //
 // Internal. Only to be used through TI provided API.
-#define FCFG1_MISC_OTP_DATA_PO_TAIL_RES_TRIM_W                               4
-#define FCFG1_MISC_OTP_DATA_PO_TAIL_RES_TRIM_M                      0x00000F00
-#define FCFG1_MISC_OTP_DATA_PO_TAIL_RES_TRIM_S                               8
+#define FCFG1_MISC_OTP_DATA_MIN_ALLOWED_RTRIM_DIV5_W                         4
+#define FCFG1_MISC_OTP_DATA_MIN_ALLOWED_RTRIM_DIV5_M                0x00000F00
+#define FCFG1_MISC_OTP_DATA_MIN_ALLOWED_RTRIM_DIV5_S                         8
 
 // Field:   [7:0] TEST_PROGRAM_REV
 //
@@ -2089,6 +2179,14 @@
 // Register: FCFG1_O_CONFIG_SYNTH
 //
 //*****************************************************************************
+// Field:    [28] DISABLE_CORNER_CAP
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_SYNTH_DISABLE_CORNER_CAP                       0x10000000
+#define FCFG1_CONFIG_SYNTH_DISABLE_CORNER_CAP_BITN                          28
+#define FCFG1_CONFIG_SYNTH_DISABLE_CORNER_CAP_M                     0x10000000
+#define FCFG1_CONFIG_SYNTH_DISABLE_CORNER_CAP_S                             28
+
 // Field: [27:12] RFC_MDM_DEMIQMC0
 //
 // Trim value for RF Core.
@@ -2305,6 +2403,13 @@
 // Register: FCFG1_O_CONFIG_MISC_ADC
 //
 //*****************************************************************************
+// Field: [21:18] MIN_ALLOWED_RTRIM
+//
+// Internal. Only to be used through TI provided API.
+#define FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_W                            4
+#define FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_M                   0x003C0000
+#define FCFG1_CONFIG_MISC_ADC_MIN_ALLOWED_RTRIM_S                           18
+
 // Field:    [17] RSSITRIMCOMPLETE_N
 //
 // Internal. Only to be used through TI provided API.

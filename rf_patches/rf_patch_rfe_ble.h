@@ -1,9 +1,9 @@
 /******************************************************************************
 *  Filename:       rf_patch_rfe_ble.h
-*  Revised:        2016-04-08 13:15:59 +0100 (Fri, 08 Apr 2016)
-*  Revision:       
+*  Revised:        $Date: 2016-06-08 15:35:28 +0200 (on, 08 jun 2016) $
+*  Revision:       $Revision: 17220 $
 *
-*  Description:    Patch for CC13XX BLE
+*  Description: RF core patch for CC1350 Bluetooth Low Energy
 *
 *  Copyright (c) 2015-2016, Texas Instruments Incorporated
 *  All rights reserved.
@@ -35,6 +35,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *
 ******************************************************************************/
+
 
 #ifndef _RF_PATCH_RFE_BLE_H
 #define _RF_PATCH_RFE_BLE_H

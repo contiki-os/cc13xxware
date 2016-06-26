@@ -1,11 +1,11 @@
 /******************************************************************************
 *  Filename:       rf_mailbox.h
-*  Revised:        2015-11-17 11:32:35 +0100 (Tue, 17 Nov 2015)
-*  Revision:       45105
+*  Revised:        $ $
+*  Revision:       $ $
 *
 *  Description:    Definitions for interface between system and radio CPU
 *
-*  Copyright (c) 2015, Texas Instruments Incorporated
+*  Copyright (c) 2015 - 2016, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
 *
 ******************************************************************************/
 
-#ifndef __MAILBOX_H
-#define __MAILBOX_H
+#ifndef _MAILBOX_H
+#define _MAILBOX_H
 
 #include <stdint.h>
 #include <string.h>
@@ -51,6 +51,7 @@
 #define RF_MODE_IEEE_15_4          0x02
 #define RF_MODE_PROPRIETARY_2_4    0x03
 #define RF_MODE_PROPRIETARY        RF_MODE_PROPRIETARY_2_4
+#define RF_MODE_MULTIPLE           0x05
 ///@}
 
 
@@ -141,7 +142,7 @@ typedef struct {
 #define CMDSTA_Pending 0x00              ///< The command has not yet been parsed
 #define CMDSTA_Done 0x01                 ///< Command successfully parsed
 
-#define CMDSTA_IllegalPointer 0x81       ///< The pointer signalled in CMDR is not valid
+#define CMDSTA_IllegalPointer 0x81       ///< The pointer signaled in CMDR is not valid
 #define CMDSTA_UnknownCommand 0x82       ///< The command number in the command structure is unknown
 #define CMDSTA_UnknownDirCommand 0x83    ///< The command number for a direct command is unknown, or the
                                          ///< command is not a direct command
@@ -237,8 +238,8 @@ typedef struct {
 #define ERROR_CMDID      0x0805   ///< Next operation has a command ID that is undefined or not a radio
                                   ///< operation command
 #define ERROR_WRONG_BG   0x0806   ///< FG level command not compatible with running BG level command
-#define ERROR_NO_SETUP   0x0807   ///< Operation using Rx or Tx attempted without CMD_RADIO_SETUP
-#define ERROR_NO_FS      0x0808   ///< Operation using Rx or Tx attempted without frequency synth configured
+#define ERROR_NO_SETUP   0x0807   ///< Operation using Rx or Tx attemted without CMD_RADIO_SETUP
+#define ERROR_NO_FS      0x0808   ///< Operation using Rx or Tx attemted without frequency synth configured
 #define ERROR_SYNTH_PROG 0x0809   ///< Synthesizer calibration failed
 #define ERROR_TXUNF      0x080A   ///< Tx underflow observed
 #define ERROR_RXOVF      0x080B   ///< Rx overflow observed

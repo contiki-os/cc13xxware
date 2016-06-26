@@ -1,11 +1,11 @@
 /******************************************************************************
 *  Filename:       rf_data_entry.h
-*  Revised:        2015-08-04 11:44:20 +0200 (Tue, 04 Aug 2015)
-*  Revision:       44329
+*  Revised:        $ $
+*  Revision:       $ $
 *
 *  Description:    Definition of API for data exchange
 *
-*  Copyright (c) 2015, Texas Instruments Incorporated
+*  Copyright (c) 2015 - 2016, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without

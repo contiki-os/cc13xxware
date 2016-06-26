@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       rf_patch_cpe_ble.h
-*  Revised:        $Date$
-*  Revision:       $Revision$
+*  Revised:        $Date: 2016-06-08 15:35:28 +0200 (on, 08 jun 2016) $
+*  Revision:       $Revision: 17220 $
 *
 *  Description:    RF Core patch file for CC1350 Bluetooth Low Energy
 *
@@ -71,11 +71,12 @@ extern "C"
 
 
 CPE_PATCH_TYPE patchImageBle[] = {
-   0x21000431,
-   0x21000443,
-   0x21000443,
-   0x21000469,
-   0x210004e9,
+   0x21000435,
+   0x21000447,
+   0x21000447,
+   0x2100048d,
+   0x2100050d,
+   0x2100046d,
    0x490b4c0c,
    0x28ff7820,
    0x7ac8d101,
@@ -89,7 +90,15 @@ CPE_PATCH_TYPE patchImageBle[] = {
    0x467082c8,
    0x47001c80,
    0x40086200,
-   0x21000510,
+   0x21000534,
+   0x4905b570,
+   0xb6724a05,
+   0x28017908,
+   0x2001dc02,
+   0x1d127088,
+   0x4710b662,
+   0x21000298,
+   0x00004a81,
    0x4e1ab5f8,
    0x6b714605,
    0x09cc4819,
@@ -134,7 +143,7 @@ CPE_PATCH_TYPE patchImageBle[] = {
    0x40046058,
    0x000000ff,
 };
-#define _NWORD_PATCHIMAGE_BLE 62
+#define _NWORD_PATCHIMAGE_BLE 71
 
 #define _NWORD_PATCHSYS_BLE 0
 
@@ -178,6 +187,7 @@ PATCH_FUN_SPEC void configureBlePatch(void)
    pPatchTab[105] = 2;
    pPatchTab[110] = 3;
    pPatchTab[65] = 4;
+   pPatchTab[53] = 5;
 }
 
 PATCH_FUN_SPEC void applyBlePatch(void)

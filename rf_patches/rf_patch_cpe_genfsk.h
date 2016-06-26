@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       rf_patch_cpe_genfsk.h
-*  Revised:        2015-09-11 13:15:59 +0100 (fr, 11 Sep 2015)
-*  Revision:       
+*  Revised:        $Date: 2016-06-08 15:35:28 +0200 (on, 08 jun 2016) $
+*  Revision:       $Revision: 17220 $
 *
 *  Description:    RF Core patch file for CC13xx generic FSK
 *
@@ -71,26 +71,48 @@ extern "C"
 
 
 CPE_PATCH_TYPE patchImageGenfsk[] = {
-   0x21000455,
-   0x210004b9,
-   0x210004db,
-   0x21000507,
-   0x21000549,
-   0x210005c9,
-   0x21000679,
+   0x210004ad,
+   0x21000449,
+   0x2100047d,
+   0x21000481,
+   0x21000511,
+   0x21000591,
+   0x21000641,
    0x4710b5f8,
    0x460eb5f8,
    0x25012100,
    0x473004ad,
-   0x4700b570,
-   0x4700b5f8,
+   0x7803480a,
+   0xf80ff000,
+   0xd00b079b,
+   0x78204c12,
+   0xd00728ff,
+   0x702121ff,
+   0x240f490e,
+   0x43200224,
+   0x82c83160,
+   0xb5f8bdf8,
+   0x47004801,
+   0x2100026b,
+   0x00004ce5,
+   0xe0014809,
+   0x0c004808,
+   0x49054c06,
+   0x2aff7822,
+   0x7acad101,
+   0x31607022,
+   0x467082c8,
+   0x47001c80,
+   0x40086200,
+   0x210006a4,
+   0x08080f07,
    0x4708b4f0,
    0x4603b570,
    0x29014615,
    0x2900d006,
    0x4a11d006,
    0xf7ff4628,
-   0xbd70ffe7,
+   0xbd70ffbb,
    0xe000480f,
    0x2405480f,
    0xd8034283,
@@ -102,50 +124,14 @@ CPE_PATCH_TYPE patchImageGenfsk[] = {
    0x4906d007,
    0x31802300,
    0xf7ff4628,
-   0xb2e0ffd1,
+   0xb2e0ffa5,
    0x4902bd70,
    0x316c4b04,
    0x0000e7f6,
    0x00005c83,
    0x2386bca0,
    0x230d8300,
-   0x210006ac,
-   0x481bb510,
-   0x56412100,
-   0xd1021c49,
-   0x7ac94919,
-   0x49187001,
-   0x31604818,
-   0x481882c8,
-   0xffb8f7ff,
-   0xb510bd10,
-   0x7ac44816,
-   0xf7ff4816,
-   0x07a0ffb3,
-   0x490fd00c,
-   0x56082000,
-   0xd0071c42,
-   0x0212220f,
-   0x4a0c4310,
-   0x82d03260,
-   0x700820ff,
-   0xb510bd10,
-   0x21004807,
-   0x1c495641,
-   0x4906d102,
-   0x70017ac9,
-   0x48094904,
-   0x82c83160,
-   0xf7ff4808,
-   0xbd10ff91,
-   0x210006dc,
-   0x40086200,
-   0x00000f07,
-   0x00004a69,
-   0x21000260,
-   0x00004ce5,
-   0x00000808,
-   0x00004bc9,
+   0x21000674,
    0x4e1ab5f8,
    0x6b714605,
    0x09cc4819,
@@ -188,7 +174,7 @@ CPE_PATCH_TYPE patchImageGenfsk[] = {
    0xe0004313,
    0x634b4393,
    0xf7ff491d,
-   0xbd10ff2f,
+   0xbd10ff77,
    0x4d1ab538,
    0x28007f28,
    0x481ad127,
@@ -249,11 +235,11 @@ CPE_PATCH_TYPE patchImageGenfsk[] = {
    0xe5e0e3c1,
    0x000000ff,
 };
-#define _NWORD_PATCHIMAGE_GENFSK 177
+#define _NWORD_PATCHIMAGE_GENFSK 163
 
 #define _NWORD_PATCHSYS_GENFSK 0
 
-#define _IRQ_PATCH_0 0x210005f5
+#define _IRQ_PATCH_0 0x210005bd
 
 
 #ifndef _GENFSK_SYSRAM_START
@@ -291,8 +277,8 @@ PATCH_FUN_SPEC void configureGenfskPatch(void)
 
 
    pPatchTab[80] = 0;
-   pPatchTab[53] = 1;
-   pPatchTab[57] = 2;
+   pPatchTab[57] = 1;
+   pPatchTab[53] = 2;
    pPatchTab[55] = 3;
    pPatchTab[110] = 4;
    pPatchTab[107] = 5;

@@ -1,11 +1,11 @@
 /******************************************************************************
 *  Filename:       rf_ble_cmd.h
-*  Revised:        2016-02-18 12:46:56 +0100 (Thu, 18 Feb 2016)
-*  Revision:       45712
+*  Revised:        $ $
+*  Revision:       $ $
 *
-*  Description:    CC13xx API for Bluetooth Low Energy commands
+*  Description:    CC26xx/CC13xx API for Bluetooth Low Energy commands
 *
-*  Copyright (c) 2015, Texas Instruments Incorporated
+*  Copyright (c) 2015 - 2016, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -90,33 +90,33 @@ typedef struct __RFC_STRUCT rfc_bleRxStatus_s rfc_bleRxStatus_t;
 //! @{
 struct __RFC_STRUCT rfc_bleRadioOp_s {
    uint16_t commandNo;                  //!<        The command ID number
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    uint8_t* pParams;                    //!<        Pointer to command specific parameter structure
@@ -128,35 +128,36 @@ struct __RFC_STRUCT rfc_bleRadioOp_s {
 //! \addtogroup CMD_BLE_SLAVE
 //! @{
 #define CMD_BLE_SLAVE                                           0x1801
+//! BLE Slave Command
 struct __RFC_STRUCT rfc_CMD_BLE_SLAVE_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1801
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleSlavePar_t *pParams;          //!<        Pointer to command specific parameter structure
@@ -168,35 +169,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_SLAVE_s {
 //! \addtogroup CMD_BLE_MASTER
 //! @{
 #define CMD_BLE_MASTER                                          0x1802
+//! BLE Master Command
 struct __RFC_STRUCT rfc_CMD_BLE_MASTER_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1802
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleMasterPar_t *pParams;         //!<        Pointer to command specific parameter structure
@@ -208,35 +210,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_MASTER_s {
 //! \addtogroup CMD_BLE_ADV
 //! @{
 #define CMD_BLE_ADV                                             0x1803
+//! BLE Connectable Undirected Advertiser Command
 struct __RFC_STRUCT rfc_CMD_BLE_ADV_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1803
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleAdvPar_t *pParams;            //!<        Pointer to command specific parameter structure
@@ -248,35 +251,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_ADV_s {
 //! \addtogroup CMD_BLE_ADV_DIR
 //! @{
 #define CMD_BLE_ADV_DIR                                         0x1804
+//! BLE Connectable Directed Advertiser Command
 struct __RFC_STRUCT rfc_CMD_BLE_ADV_DIR_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1804
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleAdvPar_t *pParams;            //!<        Pointer to command specific parameter structure
@@ -288,35 +292,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_ADV_DIR_s {
 //! \addtogroup CMD_BLE_ADV_NC
 //! @{
 #define CMD_BLE_ADV_NC                                          0x1805
+//! BLE Non-Connectable Advertiser Command
 struct __RFC_STRUCT rfc_CMD_BLE_ADV_NC_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1805
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleAdvPar_t *pParams;            //!<        Pointer to command specific parameter structure
@@ -328,35 +333,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_ADV_NC_s {
 //! \addtogroup CMD_BLE_ADV_SCAN
 //! @{
 #define CMD_BLE_ADV_SCAN                                        0x1806
+//! BLE Scannable Undirected Advertiser Command
 struct __RFC_STRUCT rfc_CMD_BLE_ADV_SCAN_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1806
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleAdvPar_t *pParams;            //!<        Pointer to command specific parameter structure
@@ -368,35 +374,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_ADV_SCAN_s {
 //! \addtogroup CMD_BLE_SCANNER
 //! @{
 #define CMD_BLE_SCANNER                                         0x1807
+//! BLE Scanner Command
 struct __RFC_STRUCT rfc_CMD_BLE_SCANNER_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1807
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleScannerPar_t *pParams;        //!<        Pointer to command specific parameter structure
@@ -408,35 +415,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_SCANNER_s {
 //! \addtogroup CMD_BLE_INITIATOR
 //! @{
 #define CMD_BLE_INITIATOR                                       0x1808
+//! BLE Initiator Command
 struct __RFC_STRUCT rfc_CMD_BLE_INITIATOR_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1808
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleInitiatorPar_t *pParams;      //!<        Pointer to command specific parameter structure
@@ -448,35 +456,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_INITIATOR_s {
 //! \addtogroup CMD_BLE_GENERIC_RX
 //! @{
 #define CMD_BLE_GENERIC_RX                                      0x1809
+//! BLE Generic Receiver Command
 struct __RFC_STRUCT rfc_CMD_BLE_GENERIC_RX_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1809
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleGenericRxPar_t *pParams;      //!<        Pointer to command specific parameter structure
@@ -488,35 +497,36 @@ struct __RFC_STRUCT rfc_CMD_BLE_GENERIC_RX_s {
 //! \addtogroup CMD_BLE_TX_TEST
 //! @{
 #define CMD_BLE_TX_TEST                                         0x180A
+//! BLE PHY Test Transmitter Command
 struct __RFC_STRUCT rfc_CMD_BLE_TX_TEST_s {
    uint16_t commandNo;                  //!<        The command ID number 0x180A
-   uint16_t status;                     //!<        An integer telling the status of the command. This value is
+   uint16_t status;                     //!< \brief An integer telling the status of the command. This value is
                                         //!<        updated by the radio CPU during operation and may be read by the
                                         //!<        system CPU at any time.
    rfc_radioOp_t *pNextOp;              //!<        Pointer to the next operation to run after this operation is done
    ratmr_t startTime;                   //!<        Absolute or relative start time (depending on the value of <code>startTrigger</code>)
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } startTrigger;                      //!<        Identification of the trigger that starts the operation
    struct {
       uint8_t rule:4;                   //!<        Condition for running next command: Rule for how to proceed
-      uint8_t nSkip:4;                  //!<        Number of skips if the rule involves skipping
+      uint8_t nSkip:4;                  //!<        Number of skips + 1 if the rule involves skipping. 0: same, 1: next, 2: skip next, ...
    } condition;
-   uint8_t channel;                     //!<        Channel to use<br>
-                                        //!<        0&ndash;39: BLE advertising/data channel number
-                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz
-                                        //!<        255: Use existing frequency
+   uint8_t channel;                     //!< \brief Channel to use<br>
+                                        //!<        0&ndash;39: BLE advertising/data channel number<br>
+                                        //!<        60&ndash;207: Custom frequency; (2300 + <code>channel</code>) MHz<br>
+                                        //!<        255: Use existing frequency<br>
                                         //!<        Others: <i>Reserved</i>
    struct {
-      uint8_t init:7;                   //!<        If <code>bOverride</code> = 1 or custom frequency is used:<br>
+      uint8_t init:7;                   //!< \brief If <code>bOverride</code> = 1 or custom frequency is used:<br>
                                         //!<        0: Do not use whitening<br>
                                         //!<        Other value: Initialization for 7-bit LFSR whitener
-      uint8_t bOverride:1;              //!<        0: Use default whitening for BLE advertising/data channels<br>
+      uint8_t bOverride:1;              //!< \brief 0: Use default whitening for BLE advertising/data channels<br>
                                         //!<        1: Override whitening initialization with value of init
    } whitening;
    rfc_bleTxTestPar_t *pParams;         //!<        Pointer to command specific parameter structure
@@ -528,9 +538,10 @@ struct __RFC_STRUCT rfc_CMD_BLE_TX_TEST_s {
 //! \addtogroup CMD_BLE_ADV_PAYLOAD
 //! @{
 #define CMD_BLE_ADV_PAYLOAD                                     0x1001
+//! BLE Update Advertising Payload Command
 struct __RFC_STRUCT rfc_CMD_BLE_ADV_PAYLOAD_s {
    uint16_t commandNo;                  //!<        The command ID number 0x1001
-   uint8_t payloadType;                 //!<        0: Advertising data<br>
+   uint8_t payloadType;                 //!< \brief 0: Advertising data<br>
                                         //!<        1: Scan response data
    uint8_t newLen;                      //!<        Length of the new payload
    uint8_t* pNewData;                   //!<        Pointer to the buffer containing the new data
@@ -609,13 +620,13 @@ struct __RFC_STRUCT rfc_bleMasterPar_s {
    uint8_t crcInit2;                    //!<        CRC initialization value used on the connection &ndash; most significant byte
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } endTrigger;                        //!<        Trigger that causes the device to end the connection event as soon as allowed
-   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> that causes the device to end the
+   ratmr_t endTime;                     //!< \brief Time used together with <code>endTrigger</code> that causes the device to end the
                                         //!<        connection event as soon as allowed
 };
 
@@ -656,25 +667,25 @@ struct __RFC_STRUCT rfc_bleSlavePar_s {
    uint8_t crcInit2;                    //!<        CRC initialization value used on the connection &ndash; most significant byte
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } timeoutTrigger;                    //!<        Trigger that defines timeout of the first receive operation
-   ratmr_t timeoutTime;                 //!<        Time used together with <code>timeoutTrigger</code> that defines timeout of the first
+   ratmr_t timeoutTime;                 //!< \brief Time used together with <code>timeoutTrigger</code> that defines timeout of the first
                                         //!<        receive operation
    uint16_t __dummy0;
    uint8_t __dummy1;
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } endTrigger;                        //!<        Trigger that causes the device to end the connection event as soon as allowed
-   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> that causes the device to end the
+   ratmr_t endTime;                     //!< \brief Time used together with <code>endTrigger</code> that causes the device to end the
                                         //!<        connection event as soon as allowed
 };
 
@@ -697,13 +708,19 @@ struct __RFC_STRUCT rfc_bleAdvPar_s {
       uint8_t bAppendTimestamp:1;       //!<        If 1, append a timestamp to the packet in the Rx queue
    } rxConfig;                          //!<        Configuration bits for the receive queue entries
    struct {
-      uint8_t advFilterPolicy:2;        //!<        The advertiser filter policy, as defined in Volume 2, Part E, Section 7.8.5 of
-                                        //!<        the Bluetooth 4.0 spec
+      uint8_t advFilterPolicy:2;        //!< \brief Advertiser filter policy<br>
+                                        //!<        0: Process scan and connect requests from all devices<br>
+                                        //!<        1: Process connect requests from all devices and only scan requests from
+                                        //!<        devices that are in the white list<br>
+                                        //!<        2: Process scan requests from all devices and only connect requests from
+                                        //!<        devices that are in the white list<br>
+                                        //!<        3: Process scan and connect requests only from devices in the white list
       uint8_t deviceAddrType:1;         //!<        The type of the device address &ndash; public (0) or random (1)
       uint8_t peerAddrType:1;           //!<        Directed advertiser: The type of the peer address &ndash; public (0) or random (1)
-      uint8_t bStrictLenFilter:1;       //!<        1: Discard messages with illegal length
+      uint8_t bStrictLenFilter:1;       //!< \brief 0: Accept any packet with a valid advertising packet length<br>
+                                        //!<        1: Discard messages with illegal length for the given packet type
       uint8_t :2;
-      uint8_t rpaMode:1;                //!<        Resolvable private address mode<br>
+      uint8_t rpaMode:1;                //!< \brief Resolvable private address mode<br>
                                         //!<        0: Normal operation<br>
                                         //!<        1: Use white list for a received RPA regardless of filter policy
    } advConfig;
@@ -717,13 +734,13 @@ struct __RFC_STRUCT rfc_bleAdvPar_s {
    uint8_t __dummy1;
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } endTrigger;                        //!<        Trigger that causes the device to end the advertiser event as soon as allowed
-   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> that causes the device to end the
+   ratmr_t endTime;                     //!< \brief Time used together with <code>endTrigger</code> that causes the device to end the
                                         //!<        advertiser event as soon as allowed
 };
 
@@ -746,16 +763,20 @@ struct __RFC_STRUCT rfc_bleScannerPar_s {
       uint8_t bAppendTimestamp:1;       //!<        If 1, append a timestamp to the packet in the Rx queue
    } rxConfig;                          //!<        Configuration bits for the receive queue entries
    struct {
-      uint8_t scanFilterPolicy:1;       //!<        The advertiser filter policy, as defined in Volume 2, Part E, Section 7.8.10 of
-                                        //!<        the Bluetooth 4.0 spec
-      uint8_t bActiveScan:1;            //!<        0: Passive scan<br>
+      uint8_t scanFilterPolicy:1;       //!< \brief Scanning filter policy<br>
+                                        //!<        0: Accept all advertisement packets<br>
+                                        //!<        1: Accept only advertisement packets from devices where the advertiser's address
+                                        //!<        is in the White list.
+      uint8_t bActiveScan:1;            //!< \brief 0: Passive scan<br>
                                         //!<        1: Active scan
       uint8_t deviceAddrType:1;         //!<        The type of the device address &ndash; public (0) or random (1)
       uint8_t :1;
-      uint8_t bStrictLenFilter:1;       //!<        1: Discard messages with illegal length
+      uint8_t bStrictLenFilter:1;       //!< \brief 0: Accept any packet with a valid advertising packet length<br>
+                                        //!<        1: Discard messages with illegal length for the given packet type
       uint8_t bAutoWlIgnore:1;          //!<        1: Automatically set ignore bit in white list
-      uint8_t bEndOnRpt:1;              //!<        1: End scanner operation after each reported ADV*_IND and potentially SCAN_RSP
-      uint8_t rpaMode:1;                //!<        Resolvable private address mode<br>
+      uint8_t bEndOnRpt:1;              //!< \brief 0: Continue scanner operation after each reporting ADV*_IND or sending SCAN_RSP<br>
+                                        //!<        1: End scanner operation after each reported ADV*_IND and potentially SCAN_RSP
+      uint8_t rpaMode:1;                //!< \brief Resolvable private address mode<br>
                                         //!<        0: Normal operation<br>
                                         //!<        1: Use white list for a received RPA regardless of filter policy
    } scanConfig;
@@ -763,9 +784,9 @@ struct __RFC_STRUCT rfc_bleScannerPar_s {
    uint16_t backoffCount;               //!<        Parameter <i>backoffCount</i> used in backoff procedure, cf. Bluetooth 4.0 spec
    struct {
       uint8_t logUpperLimit:4;          //!<        Binary logarithm of parameter upperLimit used in scanner backoff procedure
-      uint8_t bLastSucceeded:1;         //!<        1 if the last SCAN_RSP was successfully received and <code>upperLimit</code>
+      uint8_t bLastSucceeded:1;         //!< \brief 1 if the last SCAN_RSP was successfully received and <code>upperLimit</code>
                                         //!<        not changed
-      uint8_t bLastFailed:1;            //!<        1 if reception of the last SCAN_RSP failed and <code>upperLimit</code> was not
+      uint8_t bLastFailed:1;            //!< \brief 1 if reception of the last SCAN_RSP failed and <code>upperLimit</code> was not
                                         //!<        changed
    } backoffPar;
    uint8_t scanReqLen;                  //!<        Size of scan request data
@@ -775,23 +796,23 @@ struct __RFC_STRUCT rfc_bleScannerPar_s {
    uint16_t __dummy0;
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } timeoutTrigger;                    //!<        Trigger that causes the device to stop receiving as soon as allowed
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } endTrigger;                        //!<        Trigger that causes the device to stop receiving as soon as allowed
-   ratmr_t timeoutTime;                 //!<        Time used together with <code>timeoutTrigger</code> that causes the device to stop
+   ratmr_t timeoutTime;                 //!< \brief Time used together with <code>timeoutTrigger</code> that causes the device to stop
                                         //!<        receiving as soon as allowed, ending with BLE_DONE_RXTIMEOUT
-   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> that causes the device to stop
+   ratmr_t endTime;                     //!< \brief Time used together with <code>endTrigger</code> that causes the device to stop
                                         //!<        receiving as soon as allowed, ending with BLE_DONE_ENDED
 };
 
@@ -814,43 +835,44 @@ struct __RFC_STRUCT rfc_bleInitiatorPar_s {
       uint8_t bAppendTimestamp:1;       //!<        If 1, append a timestamp to the packet in the Rx queue
    } rxConfig;                          //!<        Configuration bits for the receive queue entries
    struct {
-      uint8_t bUseWhiteList:1;          //!<        Initiator filter policy, cf. Volume 2, Part E, Section 7.8.10 of the
-                                        //!<        Bluetooth 4.0 spec:<br>
+      uint8_t bUseWhiteList:1;          //!< \brief Initiator filter policy<br>
                                         //!<        0: Use specific peer address<br>
                                         //!<        1: Use white list
-      uint8_t bDynamicWinOffset:1;      //!<        1: Use dynamic WinOffset insertion
+      uint8_t bDynamicWinOffset:1;      //!< \brief 0: No dynamic WinOffset insertion<br>
+                                        //!<        1: Use dynamic WinOffset insertion
       uint8_t deviceAddrType:1;         //!<        The type of the device address &ndash; public (0) or random (1)
       uint8_t peerAddrType:1;           //!<        The type of the peer address &ndash; public (0) or random (1)
-      uint8_t bStrictLenFilter:1;       //!<        1: Discard messages with illegal length
+      uint8_t bStrictLenFilter:1;       //!< \brief 0: Accept any packet with a valid advertising packet length<br>
+                                        //!<        1: Discard messages with illegal length for the given packet type
    } initConfig;
    uint8_t __dummy0;
    uint8_t connectReqLen;               //!<        Size of connect request data
    uint8_t* pConnectReqData;            //!<        Pointer to buffer containing LLData to go in the CONNECT_REQ
    uint16_t* pDeviceAddress;            //!<        Pointer to device address used for this device
    rfc_bleWhiteListEntry_t *pWhiteList; //!<        Pointer to white list or peer address
-   ratmr_t connectTime;                 //!<        Indication of timer value of the first possible start time of the first connection event.
+   ratmr_t connectTime;                 //!< \brief Indication of timer value of the first possible start time of the first connection event.
                                         //!<        Set to the calculated value if a connection is made and to the next possible connection
                                         //!<        time if not.
    uint16_t __dummy1;
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } timeoutTrigger;                    //!<        Trigger that causes the device to stop receiving as soon as allowed
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } endTrigger;                        //!<        Trigger that causes the device to stop receiving as soon as allowed
-   ratmr_t timeoutTime;                 //!<        Time used together with <code>timeoutTrigger</code> that causes the device to stop
+   ratmr_t timeoutTime;                 //!< \brief Time used together with <code>timeoutTrigger</code> that causes the device to stop
                                         //!<        receiving as soon as allowed, ending with BLE_DONE_RXTIMEOUT
-   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> that causes the device to stop
+   ratmr_t endTime;                     //!< \brief Time used together with <code>endTrigger</code> that causes the device to stop
                                         //!<        receiving as soon as allowed, ending with BLE_DONE_ENDED
 };
 
@@ -872,7 +894,7 @@ struct __RFC_STRUCT rfc_bleGenericRxPar_s {
       uint8_t bAppendStatus:1;          //!<        If 1, append a status byte to the packet in the Rx queue
       uint8_t bAppendTimestamp:1;       //!<        If 1, append a timestamp to the packet in the Rx queue
    } rxConfig;                          //!<        Configuration bits for the receive queue entries
-   uint8_t bRepeat;                     //!<        0: End operation after receiving a packet<br>
+   uint8_t bRepeat;                     //!< \brief 0: End operation after receiving a packet<br>
                                         //!<        1: Restart receiver after receiving a packet
    uint16_t __dummy0;
    uint32_t accessAddress;              //!<        Access address used on the connection
@@ -881,13 +903,13 @@ struct __RFC_STRUCT rfc_bleGenericRxPar_s {
    uint8_t crcInit2;                    //!<        CRC initialization value used on the connection &ndash; most significant byte
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } endTrigger;                        //!<        Trigger that causes the device to end the Rx operation
-   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> that causes the device to end the
+   ratmr_t endTime;                     //!< \brief Time used together with <code>endTrigger</code> that causes the device to end the
                                         //!<        Rx operation
 };
 
@@ -898,31 +920,31 @@ struct __RFC_STRUCT rfc_bleGenericRxPar_s {
 //! Parameter structure for Tx test (CMD_BLE_TX_TEST)
 
 struct __RFC_STRUCT rfc_bleTxTestPar_s {
-   uint16_t numPackets;                 //!<        Number of packets to transmit<br>
+   uint16_t numPackets;                 //!< \brief Number of packets to transmit<br>
                                         //!<        0: Transmit unlimited number of packets
    uint8_t payloadLength;               //!<        The number of payload bytes in each packet.
-   uint8_t packetType;                  //!<        The packet type to be used, encoded according to the Bluetooth 4.0 spec, Volume 2, Part E,
+   uint8_t packetType;                  //!< \brief The packet type to be used, encoded according to the Bluetooth 4.0 spec, Volume 2, Part E,
                                         //!<        Section 7.8.29
    ratmr_t period;                      //!<        Number of radio timer cycles between the start of each packet
    struct {
-      uint8_t bOverrideDefault:1;       //!<        0: Use default packet encoding<br>
+      uint8_t bOverrideDefault:1;       //!< \brief 0: Use default packet encoding<br>
                                         //!<        1: Override packet contents
-      uint8_t bUsePrbs9:1;              //!<        If <code>bOverride</code> is 1:<br>
+      uint8_t bUsePrbs9:1;              //!< \brief If <code>bOverride</code> is 1:<br>
                                         //!<        1: Use PRBS9 encoding of packet
-      uint8_t bUsePrbs15:1;             //!<        If <code>bOverride</code> is 1:<br>
+      uint8_t bUsePrbs15:1;             //!< \brief If <code>bOverride</code> is 1:<br>
                                         //!<        1: Use PRBS15 encoding of packet
    } config;
    uint8_t byteVal;                     //!<        If <code>config.bOverride</code> is 1, value of each byte to be sent
    uint8_t __dummy0;
    struct {
       uint8_t triggerType:4;            //!<        The type of trigger
-      uint8_t bEnaCmd:1;                //!<        0: No alternative trigger command<br>
+      uint8_t bEnaCmd:1;                //!< \brief 0: No alternative trigger command<br>
                                         //!<        1: CMD_TRIGGER can be used as an alternative trigger
       uint8_t triggerNo:2;              //!<        The trigger number of the CMD_TRIGGER command that triggers this action
-      uint8_t pastTrig:1;               //!<        0: A trigger in the past is never triggered, or for start of commands, give an error<br>
+      uint8_t pastTrig:1;               //!< \brief 0: A trigger in the past is never triggered, or for start of commands, give an error<br>
                                         //!<        1: A trigger in the past is triggered as soon as possible
    } endTrigger;                        //!<        Trigger that causes the device to end the Test Tx operation
-   ratmr_t endTime;                     //!<        Time used together with <code>endTrigger</code> that causes the device to end the
+   ratmr_t endTime;                     //!< \brief Time used together with <code>endTrigger</code> that causes the device to end the
                                         //!<        Test Tx operation
 };
 
@@ -930,24 +952,24 @@ struct __RFC_STRUCT rfc_bleTxTestPar_s {
 
 //! \addtogroup bleMasterSlaveOutput
 //! @{
-//! Output structure for master and slave (CMD_BLE_MASTER/CMD_BLE_SLAVE)
+//! Output structure for master and slave (CMD_BLE_MASTER and CMD_BLE_SLAVE)
 
 struct __RFC_STRUCT rfc_bleMasterSlaveOutput_s {
-   uint8_t nTx;                         //!<        Total number of packets (including auto-empty and retransmissions) that have been
+   uint8_t nTx;                         //!< \brief Total number of packets (including auto-empty and retransmissions) that have been
                                         //!<        transmitted
    uint8_t nTxAck;                      //!<        Total number of transmitted packets (including auto-empty) that have been ACK'ed
    uint8_t nTxCtrl;                     //!<        Number of unique LL control packets from the Tx queue that have been transmitted
    uint8_t nTxCtrlAck;                  //!<        Number of LL control packets from the Tx queue that have been finished (ACK'ed)
-   uint8_t nTxCtrlAckAck;               //!<        Number of LL control packets that have been ACK'ed and where an ACK has been sent in
+   uint8_t nTxCtrlAckAck;               //!< \brief Number of LL control packets that have been ACK'ed and where an ACK has been sent in
                                         //!<        response
    uint8_t nTxRetrans;                  //!<        Number of retransmissions that has been done
    uint8_t nTxEntryDone;                //!<        Number of packets from the Tx queue that have been finished (ACK'ed)
    uint8_t nRxOk;                       //!<        Number of packets that have been received with payload, CRC OK and not ignored
    uint8_t nRxCtrl;                     //!<        Number of LL control packets that have been received with CRC OK and not ignored
-   uint8_t nRxCtrlAck;                  //!<        Number of LL control packets that have been received with CRC OK and not ignored, and
+   uint8_t nRxCtrlAck;                  //!< \brief Number of LL control packets that have been received with CRC OK and not ignored, and
                                         //!<        then ACK'ed
    uint8_t nRxNok;                      //!<        Number of packets that have been received with CRC error
-   uint8_t nRxIgnored;                  //!<        Number of packets that have been received with CRC OK and ignored due to repeated
+   uint8_t nRxIgnored;                  //!< \brief Number of packets that have been received with CRC OK and ignored due to repeated
                                         //!<        sequence number
    uint8_t nRxEmpty;                    //!<        Number of packets that have been received with CRC OK and no payload
    uint8_t nRxBufFull;                  //!<        Number of packets that have been received and discarded due to lack of buffer space
@@ -959,7 +981,7 @@ struct __RFC_STRUCT rfc_bleMasterSlaveOutput_s {
       uint8_t bLastEmpty:1;             //!<        1 if the last received packet with CRC OK was empty; 0 otherwise
       uint8_t bLastCtrl:1;              //!<        1 if the last received packet with CRC OK was empty; 0 otherwise
       uint8_t bLastMd:1;                //!<        1 if the last received packet with CRC OK had MD = 1; 0 otherwise
-      uint8_t bLastAck:1;               //!<        1 if the last received packet with CRC OK was an ACK of a transmitted packet;
+      uint8_t bLastAck:1;               //!< \brief 1 if the last received packet with CRC OK was an ACK of a transmitted packet;
                                         //!<        0 otherwise
    } pktStatus;
    ratmr_t timeStamp;                   //!<        Slave operation: Time stamp of first received packet
@@ -1058,10 +1080,10 @@ struct __RFC_STRUCT rfc_bleWhiteListEntry_s {
    struct {
       uint8_t bEnable:1;                //!<        1 if the entry is in use, 0 if the entry is not in use
       uint8_t addrType:1;               //!<        The type address in the entry &ndash; public (0) or random (1)
-      uint8_t bWlIgn:1;                 //!<        1 if the entry is to be ignored by a scanner, 0 otherwise. Used to mask out
+      uint8_t bWlIgn:1;                 //!< \brief 1 if the entry is to be ignored by a scanner, 0 otherwise. Used to mask out
                                         //!<        entries that have already been scanned and reported.
       uint8_t :1;
-      uint8_t bIrkValid:1;              //!<        1 if a valid IRK exists, so that the entry is to be ignored by an initiator,
+      uint8_t bIrkValid:1;              //!< \brief 1 if a valid IRK exists, so that the entry is to be ignored by an initiator,
                                         //!<        0 otherwise
    } conf;
    uint16_t address;                    //!<        Least significant 16 bits of the address contained in the entry
@@ -1076,7 +1098,7 @@ struct __RFC_STRUCT rfc_bleWhiteListEntry_s {
 
 struct __RFC_STRUCT rfc_bleRxStatus_s {
    struct {
-      uint8_t channel:6;                //!<        The channel on which the packet was received, provided channel is in the range
+      uint8_t channel:6;                //!< \brief The channel on which the packet was received, provided channel is in the range
                                         //!<        0&ndash;39; otherwise 0x3F
       uint8_t bIgnore:1;                //!<        1 if the packet is marked as ignored, 0 otherwise
       uint8_t bCrcErr:1;                //!<        1 if the packet was received with CRC error, 0 otherwise

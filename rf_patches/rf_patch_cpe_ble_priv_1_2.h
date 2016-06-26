@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       rf_patch_cpe_ble_priv_1_2.h
-*  Revised:        $Date$
-*  Revision:       $Revision$
+*  Revised:        $Date: 2016-06-08 15:35:28 +0200 (on, 08 jun 2016) $
+*  Revision:       $Revision: 17220 $
 *
 *  Description:    RF Core patch file for CC1350 Bluetooth Low Energy with privacy 1.2 support
 *
@@ -71,12 +71,13 @@ extern "C"
 
 
 CPE_PATCH_TYPE patchImageBlePriv12[] = {
-   0x21000595,
-   0x21000435,
-   0x21000447,
-   0x21000447,
-   0x210005e1,
-   0x21000661,
+   0x210005b9,
+   0x21000439,
+   0x2100044b,
+   0x2100044b,
+   0x21000605,
+   0x21000685,
+   0x21000471,
    0x490b4c0c,
    0x28ff7820,
    0x7ac8d101,
@@ -90,7 +91,15 @@ CPE_PATCH_TYPE patchImageBlePriv12[] = {
    0x467082c8,
    0x47001c80,
    0x40086200,
-   0x21000688,
+   0x210006ac,
+   0x4905b570,
+   0xb6724a05,
+   0x28017908,
+   0x2001dc02,
+   0x1d127088,
+   0x4710b662,
+   0x21000298,
+   0x00004a81,
    0x4d53b5fe,
    0x462c4628,
    0x90003040,
@@ -181,9 +190,9 @@ CPE_PATCH_TYPE patchImageBlePriv12[] = {
    0x00010603,
    0x0001018d,
    0x000114c0,
-   0x21000549,
-   0x21000533,
-   0x2100046d,
+   0x2100056d,
+   0x21000557,
+   0x21000491,
    0x4e1ab5f8,
    0x6b714605,
    0x09cc4819,
@@ -228,7 +237,7 @@ CPE_PATCH_TYPE patchImageBlePriv12[] = {
    0x40046058,
    0x000000ff,
 };
-#define _NWORD_PATCHIMAGE_BLE_PRIV_1_2 156
+#define _NWORD_PATCHIMAGE_BLE_PRIV_1_2 165
 
 #define _NWORD_PATCHSYS_BLE_PRIV_1_2 0
 
@@ -273,6 +282,7 @@ PATCH_FUN_SPEC void configureBlePriv12Patch(void)
    pPatchTab[105] = 3;
    pPatchTab[110] = 4;
    pPatchTab[65] = 5;
+   pPatchTab[53] = 6;
 }
 
 PATCH_FUN_SPEC void applyBlePriv12Patch(void)
