@@ -57,20 +57,20 @@
 #include <driverlib/rf_mailbox.h>
 #include <driverlib/rf_common_cmd.h>
 
-typedef struct __RFC_STRUCT rfc_carrierSense_s rfc_carrierSense_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_TX_s rfc_CMD_PROP_TX_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_s rfc_CMD_PROP_RX_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_TX_ADV_s rfc_CMD_PROP_TX_ADV_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_ADV_s rfc_CMD_PROP_RX_ADV_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_CS_s rfc_CMD_PROP_CS_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_RADIO_SETUP_s rfc_CMD_PROP_RADIO_SETUP_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_RADIO_DIV_SETUP_s rfc_CMD_PROP_RADIO_DIV_SETUP_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_SNIFF_s rfc_CMD_PROP_RX_SNIFF_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_RX_ADV_SNIFF_s rfc_CMD_PROP_RX_ADV_SNIFF_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_SET_LEN_s rfc_CMD_PROP_SET_LEN_t;
-typedef struct __RFC_STRUCT rfc_CMD_PROP_RESTART_RX_s rfc_CMD_PROP_RESTART_RX_t;
-typedef struct __RFC_STRUCT rfc_propRxOutput_s rfc_propRxOutput_t;
-typedef struct __RFC_STRUCT rfc_propRxStatus_s rfc_propRxStatus_t;
+typedef struct rfc_carrierSense_s      rfc_carrierSense_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_TX_s       rfc_CMD_PROP_TX_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_RX_s       rfc_CMD_PROP_RX_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_TX_ADV_s   rfc_CMD_PROP_TX_ADV_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_RX_ADV_s   rfc_CMD_PROP_RX_ADV_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_CS_s       rfc_CMD_PROP_CS_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_RADIO_SETUP_s rfc_CMD_PROP_RADIO_SETUP_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_RADIO_DIV_SETUP_s rfc_CMD_PROP_RADIO_DIV_SETUP_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_RX_SNIFF_s rfc_CMD_PROP_RX_SNIFF_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_RX_ADV_SNIFF_s rfc_CMD_PROP_RX_ADV_SNIFF_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_SET_LEN_s  rfc_CMD_PROP_SET_LEN_t __RFC_STRUCT;
+typedef struct rfc_CMD_PROP_RESTART_RX_s rfc_CMD_PROP_RESTART_RX_t __RFC_STRUCT;
+typedef struct rfc_propRxOutput_s      rfc_propRxOutput_t __RFC_STRUCT;
+typedef struct rfc_propRxStatus_s      rfc_propRxStatus_t __RFC_STRUCT;
 
 //! \addtogroup carrierSense
 //! @{
