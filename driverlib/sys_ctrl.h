@@ -198,7 +198,7 @@ SysCtrlAonSync(void)
     //
     // Sync the AON interface
     //
-    HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
+    (void)HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 }
 
 //*****************************************************************************
@@ -227,7 +227,7 @@ SysCtrlAonUpdate(void)
     // in sync.
     //
     HWREG(AON_RTC_BASE + AON_RTC_O_SYNC) = 1;
-    HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
+    (void)HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 }
 
 
