@@ -221,40 +221,74 @@
 //#####################################
 // Debug access settings
 //#####################################
+//* DEBUG       - enables basic EMULATOR functionality
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
+//* DEBUG_EMU   - declares wich TAPs to enable for EMULATOR access
+//* \arg 1      - enables WUC
+//* \arg 2      - enables PRCM
+//* \arg 4      - enables PBIST
+#define DEBUG_EMU_WUC       1
+#define DEBUG_EMU_PRCM      2
+#define DEBUG_EMU_PBIST     4
+#ifndef DEBUG_EMU
+#define DEBUGEMU 0
+#endif
+
+#if DEBUG || DEBUG_EMU
+#define TAP_ENABLE  0xC5        // Access enabled if also enabled in FCFG
+#else
+#define TAP_ENABLE  0           // Access disabled
+#endif
 
 #ifndef SET_CCFG_CCFG_TI_OPTIONS_TI_FA_ENABLE
+#if DEBUG_EMU < 1
 #define SET_CCFG_CCFG_TI_OPTIONS_TI_FA_ENABLE           0x00       // Disable unlocking of TI FA option
-// #define SET_CCFG_CCFG_TI_OPTIONS_TI_FA_ENABLE        0xC5       // Enable unlocking of TI FA option with the unlock code
+#else
+#define SET_CCFG_CCFG_TI_OPTIONS_TI_FA_ENABLE        0xC5       // Enable unlocking of TI FA option with the unlock code
+#endif
 #endif
 
 #ifndef SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE
-#define SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE       0x00       // Access disabled
-// #define SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE          0xC5       // Access enabled if also enabled in FCFG
+#define SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE       TAP_ENABLE
 #endif
 
 #ifndef SET_CCFG_CCFG_TAP_DAP_0_PRCM_TAP_ENABLE
+#if (DEBUG_EMU & DEBUG_EMU_PRCM) == 0
 #define SET_CCFG_CCFG_TAP_DAP_0_PRCM_TAP_ENABLE         0x00       // Access disabled
-// #define SET_CCFG_CCFG_TAP_DAP_0_PRCM_TAP_ENABLE      0xC5       // Access enabled if also enabled in FCFG
+#else
+#define SET_CCFG_CCFG_TAP_DAP_0_PRCM_TAP_ENABLE      0xC5       // Access enabled if also enabled in FCFG
+#endif
 #endif
 
 #ifndef SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE
-#define SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE      0x00       // Access disabled
-// #define SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE         0xC5       // Access enabled if also enabled in FCFG
+#define SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE      TAP_ENABLE
 #endif
 
 #ifndef SET_CCFG_CCFG_TAP_DAP_1_PBIST2_TAP_ENABLE
+#if (DEBUG_EMU & DEBUG_EMU_PBIST) == 0
 #define SET_CCFG_CCFG_TAP_DAP_1_PBIST2_TAP_ENABLE       0x00       // Access disabled
-// #define SET_CCFG_CCFG_TAP_DAP_1_PBIST2_TAP_ENABLE    0xC5       // Access enabled if also enabled in FCFG
+#else
+#define SET_CCFG_CCFG_TAP_DAP_1_PBIST2_TAP_ENABLE    0xC5       // Access enabled if also enabled in FCFG
+#endif
 #endif
 
 #ifndef SET_CCFG_CCFG_TAP_DAP_1_PBIST1_TAP_ENABLE
+#if (DEBUG_EMU & DEBUG_EMU_PBIST) == 0
 #define SET_CCFG_CCFG_TAP_DAP_1_PBIST1_TAP_ENABLE       0x00       // Access disabled
-// #define SET_CCFG_CCFG_TAP_DAP_1_PBIST1_TAP_ENABLE    0xC5       // Access enabled if also enabled in FCFG
+#else
+#define SET_CCFG_CCFG_TAP_DAP_1_PBIST1_TAP_ENABLE    0xC5       // Access enabled if also enabled in FCFG
+#endif
 #endif
 
 #ifndef SET_CCFG_CCFG_TAP_DAP_1_WUC_TAP_ENABLE
+#if (DEBUG_EMU & DEBUG_EMU_WUC) == 0
 #define SET_CCFG_CCFG_TAP_DAP_1_WUC_TAP_ENABLE          0x00       // Access disabled
-// #define SET_CCFG_CCFG_TAP_DAP_1_WUC_TAP_ENABLE       0xC5       // Access enabled if also enabled in FCFG
+#else
+#define SET_CCFG_CCFG_TAP_DAP_1_WUC_TAP_ENABLE       0xC5       // Access enabled if also enabled in FCFG
+#endif
 #endif
 
 //#####################################
