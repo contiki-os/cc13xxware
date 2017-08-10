@@ -164,7 +164,7 @@ SetupSetVddrLevel( uint32_t ccfg_ModeConfReg )
          if ( deltaTrim < -2 ) deltaTrim = -2;
          currentTrim += deltaTrim;
 
-         HWREG( AON_RTC_BASE + AON_RTC_O_SYNC ); // Wait one SCLK_LF period
+         (void)HWREG( AON_RTC_BASE + AON_RTC_O_SYNC ); // Wait one SCLK_LF period
 
          HWREGH( ADI3_BASE + ADI_O_MASK8B + ( ADI_3_REFSYS_O_DCDCCTL0 * 2 )) =
             ( ADI_3_REFSYS_DCDCCTL0_VDDR_TRIM_M << 8 ) | (( currentTrim <<
@@ -174,11 +174,11 @@ SetupSetVddrLevel( uint32_t ccfg_ModeConfReg )
          HWREG( AON_RTC_BASE + AON_RTC_O_SYNC ) = 1; // Force SCLK_LF period wait on next read
       }
 
-      HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // Wait one SCLK_LF period
+      (void)HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // Wait one SCLK_LF period
       HWREG( AON_RTC_BASE + AON_RTC_O_SYNC ) = 1; // Force SCLK_LF period wait on next read
-      HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // Wait one more SCLK_LF period before re-enabling VDDR BOD
+      (void)HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // Wait one more SCLK_LF period before re-enabling VDDR BOD
       HWREGBITW( AON_SYSCTL_BASE + AON_SYSCTL_O_RESETCTL, AON_SYSCTL_RESETCTL_VDDR_LOSS_EN_BITN ) = 1;
-      HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // And finally wait for VDDR_LOSS_EN setting to propagate
+      (void)HWREG( AON_RTC_BASE + AON_RTC_O_SYNC );     // And finally wait for VDDR_LOSS_EN setting to propagate
    }
 }
 
@@ -456,6 +456,8 @@ SetupAfterColdResetWakeupFromShutDownCfg3( uint32_t ccfg_ModeConfReg )
             break;
         }
         // Not a HPOSC chip - fall through to default
+        // falls through
+        //no break  - make eclipse happy
     default :
         // XOSC source is a 24 MHz xtal (default)
         // Set bit DDI_0_OSC_CTL0_XTAL_IS_24M (this is bit 31 in DDI_0_OSC_O_CTL0)
@@ -502,7 +504,8 @@ SetupAfterColdResetWakeupFromShutDownCfg3( uint32_t ccfg_ModeConfReg )
                               IOC_STD_INPUT | IOC_HYST_ENABLE );   // Route external clock to AON IOC w/hysteresis
                                                                    // Set XOSC_LF in bypass mode to allow external 32k clock
         HWREG( AUX_DDI0_OSC_BASE + DDI_O_SET + DDI_0_OSC_O_CTL0 ) = DDI_0_OSC_CTL0_XOSC_LF_DIG_BYPASS;
-        // Fall through to set XOSC_LF as SCLK_LF source
+        // falls through to set XOSC_LF as SCLK_LF source
+        //no break - make eclipse happy
     case 2 : // XOSC_LF -> SLCK_LF (32768 Hz)
         OSCClockSourceSet( OSC_SRC_CLK_LF, OSC_XOSC_LF );
         break;

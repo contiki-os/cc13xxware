@@ -67,14 +67,14 @@ AONWUCAuxReset(void)
     HWREGBITW(AON_WUC_BASE + AON_WUC_O_AUXCTL, AON_WUC_AUXCTL_RESET_REQ_BITN) = 1;
 
     // Wait for AON interface to be in sync.
-    HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
+    (void)HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 
     // De-assert reset on the AUX domain.
 //  HWREG(AON_WUC_BASE + AON_WUC_O_AUXCTL) &= ~AON_WUC_AUXCTL_RESET_REQ;  // ROM version
     HWREGBITW(AON_WUC_BASE + AON_WUC_O_AUXCTL, AON_WUC_AUXCTL_RESET_REQ_BITN) = 0;
 
     // Wait for AON interface to be in sync.
-    HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
+    (void)HWREG(AON_RTC_BASE + AON_RTC_O_SYNC);
 }
 
 //*****************************************************************************
